@@ -26,14 +26,19 @@ University students seeking help with course materials or topics and willing to 
 - **Framework**: Laravel
 
 ### Frontend
-- **Framework/Library**: React
+- **Framework/Library**: React with Inertia.js
 
 ### Rendering Method
 - **Client-Side Rendering (CSR)**
 
-### UI Design
-- **Design Tool**: Figma
-- **Figma Link**: https://www.figma.com/design/fKDPJjzPK2vsDutBGt5i9C/Project?node-id=0-1&t=Gq2vDuo5aOzYM2P0-1
+### **UI Design**
+- **Tool**: Figma  
+- **Design Link**:  [CourseMate Figma Design](https://www.figma.com/design/fKDPJjzPK2vsDutBGt5i9C/Project?node-id=0-1&t=Gq2vDuo5aOzYM2P0-1)
+  
+  ```bash
+  https://www.figma.com/design/fKDPJjzPK2vsDutBGt5i9C/Project?node-id=0-1&t=Gq2vDuo5aOzYM2P0-1
+
+
 
 ## Project Features
 
