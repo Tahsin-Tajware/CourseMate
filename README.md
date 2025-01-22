@@ -1,66 +1,129 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CourseMate
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Team Members
 
-## About Laravel
+| **ID**      | **Name**                 | **Email**                    | **Role**           |
+| ----------- | ------------------------ | ---------------------------- | ------------------ |
+| 20220104006 | **Tahsin Tajware**       | tahsintajware12345@gmail.com | Frontend & Backend |
+| 20220104014 | **Abdullah Al Tamim**    | abdullahaltamim001@gmail.com | Lead               |
+| 20220104015 | **Nasidur Rahman Auloy** | nasidurrahman1606@gmail.com  | Frontend           |
+| 20220104025 | **Sonod Sadman**         | sonodsadman@gmail.com        | Backend            |
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Project Overview
 
--   [Simple, fast routing engine](https://laravel.com/docs/routing).
--   [Powerful dependency injection container](https://laravel.com/docs/container).
--   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
--   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
--   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
--   [Robust background job processing](https://laravel.com/docs/queues).
--   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Project Title
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**CourseMate**
 
-## Learning Laravel
+### Objective
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+CourseMate is a collaborative platform designed to help university students with course-related questions. It allows users to ask and answer questions, providing a space to share knowledge and earn recognition through points and badges. It aims to make learning more interactive and engaging.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Target Audience
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+University students seeking help with course materials or topics and willing to share knowledge with peers.
 
-## Laravel Sponsors
+## Tech Stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Backend
 
-### Premium Partners
+-   **Framework**: Laravel
 
--   **[Vehikl](https://vehikl.com/)**
--   **[Tighten Co.](https://tighten.co)**
--   **[WebReinvent](https://webreinvent.com/)**
--   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
--   **[64 Robots](https://64robots.com)**
--   **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
--   **[Cyber-Duck](https://cyber-duck.co.uk)**
--   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
--   **[Jump24](https://jump24.co.uk)**
--   **[Redberry](https://redberry.international/laravel/)**
--   **[Active Logic](https://activelogic.com)**
--   **[byte5](https://byte5.de)**
--   **[OP.GG](https://op.gg)**
+### Frontend
 
-## Contributing
+-   **Framework/Library**: React with Inertia.js
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Rendering Method
 
-## Code of Conduct
+-   **Client-Side Rendering (CSR)**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### **UI Design**
 
-## Security Vulnerabilities
+-   **Tool**: Figma
+-   **Design Link**: [CourseMate Figma Design](https://www.figma.com/design/fKDPJjzPK2vsDutBGt5i9C/Project?node-id=0-1&t=Gq2vDuo5aOzYM2P0-1)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    ```bash
+    https://www.figma.com/design/fKDPJjzPK2vsDutBGt5i9C/Project?node-id=0-1&t=Gq2vDuo5aOzYM2P0-1
+    ```
 
-## License
+## Project Features
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+1. **User Authentication**
+
+    - Registration & Login.
+
+2. **Question & Answer System**
+
+    - Ask questions related to your university or course.
+    - Option to post questions anonymously.
+    - Search for similar questions before posting.
+
+3. **Earn Recognition**
+
+    - Earn points for answering questions correctly.
+    - Points lead to badges that can be showcased in user profiles.
+
+4. **Content Interaction**
+
+    - Upvote answers that solve your problem.
+    - Report abusive comments (handled by Admin).
+
+5. **Content Management**
+
+    - Update previously asked questions; notify answerers.
+    - Update answers; notify questioners.
+    - Save questions/discussions for future reference.
+
+6. **Tagging System**
+    - Questions tagged based on university and course number.
+
+## API Endpoints
+
+### Authentication
+
+-   **POST /register**: User registration.
+-   **POST /login**: User login.
+
+### Questions
+
+-   **GET /questions**: Fetch all questions.
+-   **POST /questions**: Create a new question.
+-   **PUT /questions/{id}**: Update a question.
+-   **DELETE /questions/{id}**: Delete a question.
+
+### Answers
+
+-   **GET /answers/{questionId}**: Fetch answers for a question.
+-   **POST /answers/{questionId}**: Post an answer.
+-   **PUT /answers/{id}**: Update an answer.
+-   **DELETE /answers/{id}**: Delete an answer.
+
+### Miscellaneous
+
+-   **POST /report**: Report an abusive comment.
+-   **GET /profile**: Fetch user profile details.
+
+## Milestones
+
+### Milestone 1: Initial Setup and Basic Features
+
+-   Set up Laravel backend and React frontend.
+-   Implement user authentication (registration and login).
+-   Create API endpoints for questions.
+-   Basic UI for login, registration, and question posting.
+
+### Milestone 2: Advanced Features and Interactions
+
+-   Implement question tagging and searching.
+-   Add anonymous posting feature.
+-   Enable upvoting and reporting.
+-   Notification system for updates (question and answer).
+-   UI for question and answer interactions.
+
+### Milestone 3: Final Touches and Deployment
+
+-   Implement badge system for user recognition.
+-   Enable saving questions/discussions.
+-   Admin panel for managing reports.
+-   Complete testing and bug fixes.
+-   Deployment to a hosting platform.
