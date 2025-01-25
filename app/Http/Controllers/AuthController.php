@@ -18,7 +18,8 @@ class AuthController extends Controller
       "email" => $validatedData["email"],
       "name" => $validatedData["name"],
       "password" => bcrypt($validatedData["password"]),
-
+      "varsity" => $validatedData["varsity"] ?? null,
+      "department" => $validatedData["department"] ?? null
     ]);
     $token = auth('api')->login($user);
 

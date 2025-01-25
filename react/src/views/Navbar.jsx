@@ -15,14 +15,14 @@ import {
   Search as SearchIcon,
   Menu as MenuIcon,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 const Navbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-
+  const [auth] = useAuth();
   const handleProfileClick = () => {
     navigate("/profile");
   };
@@ -226,24 +226,27 @@ const Navbar = ({ onToggleSidebar }) => {
         >
           <Notifications />
         </IconButton>
-        <Avatar
-          onClick={handleProfileClick}
-          alt="Profile"
-          sx={{
-            width: 40,
-            height: 40,
-            backgroundColor: "#ccc",
-            fontSize: "18px",
-            color: "#fff",
-            cursor: "pointer",
-            "&:hover": {
-              backgroundColor: "#FF6D00",
+        {auth?.user?.name ?
+          <Avatar
+            onClick={handleProfileClick}
+            alt="Profile"
+            sx={{
+              width: 40,
+              height: 40,
+              backgroundColor: "#ccc",
+              fontSize: "18px",
               color: "#fff",
-            },
-          }}
-        >
-          P
-        </Avatar>
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "#FF6D00",
+                color: "#fff",
+              },
+            }}
+          >
+            {auth?.user?.name?.charAt(0)}
+          </Avatar> :
+          <Link to='/login' className=" font-semibold hover:text-orange-600 "> Sign In</Link>
+        }
       </Box>
 
       <Popper
