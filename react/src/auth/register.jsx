@@ -180,7 +180,7 @@ const Register = () => {
                 name="university"
                 value={formData.varsity}
                 onChange={handleUniversityChange}
-                required
+
                 placeholder="Enter your university"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700"
               />
@@ -204,7 +204,7 @@ const Register = () => {
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
-                required
+
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700"
               >
                 <option value="">Select Department</option>

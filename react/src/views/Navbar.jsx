@@ -226,7 +226,7 @@ const Navbar = ({ onToggleSidebar }) => {
         >
           <Notifications />
         </IconButton>
-        {auth?.user ?
+        {auth?.user?.name ?
           <Avatar
             onClick={handleProfileClick}
             alt="Profile"
