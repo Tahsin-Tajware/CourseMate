@@ -3,6 +3,8 @@ import { Box } from "@mui/material";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import { Outlet } from "react-router-dom";
+import { ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
 
 const Layout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -38,6 +40,8 @@ const Layout = () => {
       </Box>
 
       <Sidebar isOpen={isSidebarOpen} onClose={handleToggleSidebar} />
+
+      <ToastContainer />
     </Box>
   );
 };
