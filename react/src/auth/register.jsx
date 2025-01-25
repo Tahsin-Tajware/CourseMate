@@ -17,8 +17,8 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    password_confirmation: '',
-    university: '',
+    confirm_password: '',
+    varsity: '',
     department: '',
   });
 
@@ -40,7 +40,7 @@ const Register = () => {
     const value = e.target.value;
     setFormData({
       ...formData,
-      university: value,
+      varsity: value,
     });
 
     if (value.length > 0) {
@@ -56,7 +56,7 @@ const Register = () => {
   const handleUniversitySelect = (university) => {
     setFormData({
       ...formData,
-      university: university.name,
+      varsity: university.name,
     });
     setFilteredUniversities([]);
   };
@@ -75,6 +75,7 @@ const Register = () => {
         token: response.data.access_token,
       });
       localStorage.setItem('access_token', response.data.access_token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
 
       toast.success('Registration successful!', {
         position: 'bottom-right',
@@ -108,7 +109,7 @@ const Register = () => {
 
   return (
     <div className="flex items-center justify-center h-screen bg-white fixed inset-0 sm:pl-60">
-      <Sidebar isOpen={false} onClose={() => {}} />
+      <Sidebar isOpen={false} onClose={() => { }} />
       <div className="flex w-full max-w-6xl bg-white rounded-lg overflow-hidden mx-auto">
         <div className="hidden md:flex w-1/3 items-center justify-center bg-transparent">
           <img
@@ -120,12 +121,12 @@ const Register = () => {
 
         <div className="w-full md:w-2/3 p-8 bg-white">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">Sign Up</h2>
-          <p className="text-gray-600 mb-6">Create an account to unlock all the amazing features.</p>
+          {/* <p className="text-gray-600 mb-6">Create an account to unlock all the amazing features.</p> */}
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
           {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
           <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-1">
-              <label className="block text-gray-700 font-medium mb-1">Name</label>
+              <label className="block text-gray-700 font-medium mb-1 ml-0">Name</label>
               <input
                 type="text"
                 name="name"
@@ -164,8 +165,8 @@ const Register = () => {
               <label className="block text-gray-700 font-medium mb-1">Confirm Password</label>
               <input
                 type="password"
-                name="password_confirmation"
-                value={formData.password_confirmation}
+                name="confirm_password"
+                value={formData.confirm_password}
                 onChange={handleChange}
                 required
                 placeholder="Confirm your password"
@@ -177,7 +178,7 @@ const Register = () => {
               <input
                 type="text"
                 name="university"
-                value={formData.university}
+                value={formData.varsity}
                 onChange={handleUniversityChange}
                 required
                 placeholder="Enter your university"

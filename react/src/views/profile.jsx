@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosPrivate from "../api/axiosPrivate";
+import { useAuth } from "../context/authContext";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -20,7 +22,8 @@ const Profile = () => {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState({ name: "", email: "" });
-
+  const [auth, setAuth] = useAuth();
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -37,9 +40,17 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  const handleLogout = () => {
-    setUserData(null);
-    setIsLoggedOut(true);
+  const handleLogout = async () => {
+
+    const response = await axiosPrivate.post("/logout", {});
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('user');
+    setAuth({
+      ...auth,
+      user: null,
+      token: null,
+    });
+    navigate('/');
   };
 
 
@@ -56,7 +67,7 @@ const Profile = () => {
   const handleEditSave = async () => {
     try {
       const response = await axiosPrivate.put("/update-profile", editData);
-      setUserData(response.data); 
+      setUserData(response.data);
       setEditOpen(false);
     } catch (err) {
       console.error("Failed to update profile:", err);
@@ -82,29 +93,39 @@ const Profile = () => {
         <Box display="flex" flexDirection="column" gap={3} width="100%" maxWidth="800px">
 
           <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
-            <Box display="flex" alignItems="center" gap={2}>
+            <Box display="flex" alignItems="center" gap={2} flex="1">
               <Avatar
                 alt={userData.name}
                 src={userData.profilePicture || ""}
                 sx={{ width: 80, height: 80 }}
               />
-              <Box>
-                <Typography variant="h5" fontWeight="bold">
+              <Box display="flex" flexDirection="column" alignItems="flex-start">
+                {/* Name and Edit button */}
+                <Typography variant="h5" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   {userData.name}
-                  <Button
+                  {/* <Button
                     variant="outlined"
                     size="small"
-                    sx={{ ml: 2, textTransform: "none" }}
+                    sx={{ textTransform: "none" }}
                     onClick={handleEditOpen}
                   >
                     Edit
-                  </Button>
+                  </Button> */}
                 </Typography>
+
                 <Typography variant="body2" color="textSecondary">
                   {userData.email}
                 </Typography>
+
+                <Box display="flex" flexDirection="row" gap={1}>
+
+                  <Typography variant="body1">{auth.user.department},</Typography>
+                  <Typography variant="body1">{auth.user.varsity}</Typography>
+                </Box>
               </Box>
             </Box>
+
+
             <Button
               variant="contained"
               color="error"
@@ -119,6 +140,7 @@ const Profile = () => {
               Logout
             </Button>
           </Box>
+
 
           <Tabs value={0} variant="scrollable" scrollButtons="auto" sx={{ borderBottom: "1px solid #e0e0e0" }}>
             <Tab label="Overview" />
