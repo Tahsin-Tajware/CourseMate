@@ -1,12 +1,27 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import axiosPrivate from "../api/axiosPrivate";
+import {
+  Box,
+  Typography,
+  Button,
+  Avatar,
+  CircularProgress,
+  Tabs,
+  Tab,
+  Grid,
+  Modal,
+  TextField,
+  Stack,
+} from "@mui/material";
+
 const Profile = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState("");
+  const [isLoggedOut, setIsLoggedOut] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editData, setEditData] = useState({ name: "", email: "" });
 
   useEffect(() => {
-    // Fetch user data when the component is mounted
     const fetchProfile = async () => {
       try {
         const response = await axiosPrivate.post("/me", {});
@@ -19,32 +34,195 @@ const Profile = () => {
         }
       }
     };
-
     fetchProfile();
   }, []);
 
+  const handleLogout = () => {
+    setUserData(null);
+    setIsLoggedOut(true);
+  };
+
+
+  const handleEditOpen = () => {
+    setEditData({ name: userData.name, email: userData.email });
+    setEditOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+  };
+
+
+  const handleEditSave = async () => {
+    try {
+      const response = await axiosPrivate.put("/update-profile", editData);
+      setUserData(response.data); 
+      setEditOpen(false);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+    }
+  };
+
+  if (isLoggedOut) {
+    return (
+      <Box display="flex" flexDirection="column" alignItems="center" gap={3} p={3}>
+        <Button variant="contained" color="primary" href="/login">
+          Login
+        </Button>
+        <Button variant="outlined" color="primary" href="/register">
+          Register
+        </Button>
+      </Box>
+    );
+  }
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Your Profile</h2>
-        {userData ? (
-          <div className="space-y-4">
-            <div>
-              <p className="text-gray-700">
-                <strong>Name:</strong> {userData.name}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-700">
-                <strong>Email:</strong> {userData.email}
-              </p>
-            </div>
-          </div>
-        ) : (
-          !error && <p>Loading profile...</p>
-        )}
-      </div>
-    </div>
+    <Box display="flex" flexDirection="column" alignItems="center" gap={3} p={3}>
+      {userData ? (
+        <Box display="flex" flexDirection="column" gap={3} width="100%" maxWidth="800px">
+
+          <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+            <Box display="flex" alignItems="center" gap={2}>
+              <Avatar
+                alt={userData.name}
+                src={userData.profilePicture || ""}
+                sx={{ width: 80, height: 80 }}
+              />
+              <Box>
+                <Typography variant="h5" fontWeight="bold">
+                  {userData.name}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    sx={{ ml: 2, textTransform: "none" }}
+                    onClick={handleEditOpen}
+                  >
+                    Edit
+                  </Button>
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {userData.email}
+                </Typography>
+              </Box>
+            </Box>
+            <Button
+              variant="contained"
+              color="error"
+              size="small"
+              onClick={handleLogout}
+              sx={{
+                textTransform: "none",
+                backgroundColor: "red",
+                "&:hover": { backgroundColor: "#b71c1c" },
+              }}
+            >
+              Logout
+            </Button>
+          </Box>
+
+          <Tabs value={0} variant="scrollable" scrollButtons="auto" sx={{ borderBottom: "1px solid #e0e0e0" }}>
+            <Tab label="Overview" />
+            <Tab label="Posts" />
+            <Tab label="Comments" />
+            <Tab label="Saved" />
+            <Tab label="Hidden" />
+            <Tab label="Upvoted" />
+            <Tab label="Downvoted" />
+          </Tabs>
+
+          <Grid container spacing={2} mt={2}>
+            <Grid item xs={6}>
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                p={2}
+                border="1px solid #ddd"
+                borderRadius={1}
+              >
+                <Typography variant="h6" fontWeight="bold">
+                  1
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Post
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                p={2}
+                border="1px solid #ddd"
+                borderRadius={1}
+              >
+                <Typography variant="h6" fontWeight="bold">
+                  12
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Followers
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+
+          <Box mt={3} p={2} border="1px solid #ddd" borderRadius={1}>
+            <Typography variant="body2" fontWeight="bold" mb={1}>
+              LINKS
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              fullWidth
+              sx={{
+                textTransform: "none",
+                borderStyle: "dashed",
+              }}
+            >
+              + Add Social Link
+            </Button>
+          </Box>
+
+          <Modal open={editOpen} onClose={handleEditClose}>
+            <Box
+              p={3}
+              bgcolor="background.paper"
+              borderRadius={1}
+              boxShadow={24}
+              width="400px"
+              mx="auto"
+              mt="20vh"
+            >
+              <Typography variant="h6" mb={2}>
+                Edit Profile
+              </Typography>
+              <Stack spacing={2}>
+                <TextField
+                  label="Name"
+                  value={editData.name}
+                  onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                  fullWidth
+                />
+                <TextField
+                  label="Email"
+                  value={editData.email}
+                  onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                  fullWidth
+                />
+                <Button variant="contained" color="primary" onClick={handleEditSave}>
+                  Save
+                </Button>
+              </Stack>
+            </Box>
+          </Modal>
+        </Box>
+      ) : error ? (
+        <Typography color="error">{error}</Typography>
+      ) : (
+        <CircularProgress />
+      )}
+    </Box>
   );
 };
 
