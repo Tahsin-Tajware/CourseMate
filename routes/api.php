@@ -20,4 +20,5 @@ Route::post('refresh', [AuthController::class, 'refresh']);
 Route::middleware(['auth:api'])->group(function () {
   Route::post('me', [AuthController::class, 'me']);
   Route::post('logout', [AuthController::class, 'logout']);
+  Route::put('update-profile/{id}', [AuthController::class, 'update']);
 });

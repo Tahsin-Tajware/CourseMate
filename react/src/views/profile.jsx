@@ -19,9 +19,9 @@ import {
 const Profile = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState("");
-  const [isLoggedOut, setIsLoggedOut] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [editData, setEditData] = useState({ name: "", email: "" });
+  const [loading, setLoading] = useState(false);
+  const [editData, setEditData] = useState({ name: "", varsity: "", department: "", current_password: "", password: "", confirm_password: "" });
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
@@ -38,7 +38,7 @@ const Profile = () => {
       }
     };
     fetchProfile();
-  }, []);
+  }, [auth, setAuth]);
 
   const handleLogout = async () => {
 
@@ -55,7 +55,7 @@ const Profile = () => {
 
 
   const handleEditOpen = () => {
-    setEditData({ name: userData.name, email: userData.email });
+    setEditData({ name: userData.name, varsity: userData.varsity, department: userData.department });
     setEditOpen(true);
   };
 
@@ -65,27 +65,25 @@ const Profile = () => {
 
 
   const handleEditSave = async () => {
+    setLoading(true);
     try {
-      const response = await axiosPrivate.put("/update-profile", editData);
+      const response = await axiosPrivate.put(`/update-profile/${userData.id}`, editData);
       setUserData(response.data);
       setEditOpen(false);
+      localStorage.setItem('user', JSON.stringify(response.data));
+      setAuth({
+        ...auth,
+        user: response.data,
+      });
     } catch (err) {
       console.error("Failed to update profile:", err);
+    } finally {
+      setLoading(false);
+
     }
   };
 
-  if (isLoggedOut) {
-    return (
-      <Box display="flex" flexDirection="column" alignItems="center" gap={3} p={3}>
-        <Button variant="contained" color="primary" href="/login">
-          Login
-        </Button>
-        <Button variant="outlined" color="primary" href="/register">
-          Register
-        </Button>
-      </Box>
-    );
-  }
+
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" gap={3} p={3}>
@@ -103,14 +101,14 @@ const Profile = () => {
                 {/* Name and Edit button */}
                 <Typography variant="h5" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   {userData.name}
-                  {/* <Button
+                  <Button
                     variant="outlined"
                     size="small"
                     sx={{ textTransform: "none" }}
                     onClick={handleEditOpen}
                   >
                     Edit
-                  </Button> */}
+                  </Button>
                 </Typography>
 
                 <Typography variant="body2" color="textSecondary">
@@ -227,13 +225,40 @@ const Profile = () => {
                   fullWidth
                 />
                 <TextField
-                  label="Email"
-                  value={editData.email}
-                  onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                  label="Varsity"
+                  value={editData.varsity}
+                  onChange={(e) => setEditData({ ...editData, varsity: e.target.value })}
+                  fullWidth
+                />
+                <TextField
+                  label="Department"
+                  value={editData.department}
+                  onChange={(e) => setEditData({ ...editData, department: e.target.value })}
+                  fullWidth
+                />
+                <TextField
+                  type="password"
+                  label="Current Password"
+                  value={editData.current_password}
+                  onChange={(e) => setEditData({ ...editData, current_password: e.target.value })}
+                  fullWidth
+                />
+                <TextField
+                  type="password"
+                  label="New Password"
+                  value={editData.password}
+                  onChange={(e) => setEditData({ ...editData, password: e.target.value })}
+                  fullWidth
+                />
+                <TextField
+                  type="password"
+                  label="Confirm Password"
+                  value={editData.confirm_password}
+                  onChange={(e) => setEditData({ ...editData, confirm_password: e.target.value })}
                   fullWidth
                 />
                 <Button variant="contained" color="primary" onClick={handleEditSave}>
-                  Save
+                  {loading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "Save"}
                 </Button>
               </Stack>
             </Box>

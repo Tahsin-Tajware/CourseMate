@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\UpdateUserRequest;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -83,5 +85,28 @@ class AuthController extends Controller
       'expires_in' => auth('api')->factory()->getTTL() * 60,
       'user' => $user
     ]);
+  }
+
+  //user defined
+  public function update(UpdateUserRequest $request, $id)
+  {
+    $user = User::find($id);
+
+    if (!$user) {
+      return response()->json(['error' => 'User not found'], 404);
+    }
+
+    // Check current password if a new password is provided
+    if ($request->filled('password')) {
+      if (!Hash::check($request->current_password, $user->password)) {
+        return response()->json(['error' => 'Current password is incorrect'], 403);
+      }
+
+      // Hash the new password
+      $user->password = bcrypt($request->password);
+    }
+    $user->fill($request->validated());
+    $user->save();
+    return response()->json($user, status: 201);
   }
 }
