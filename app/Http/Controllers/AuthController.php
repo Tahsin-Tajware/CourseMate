@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -108,5 +109,35 @@ class AuthController extends Controller
     $user->fill($request->validated());
     $user->save();
     return response()->json($user, status: 201);
+  }
+
+  public function redirectToProvider()
+  {
+    return Socialite::driver('google')->stateless()->redirect();
+  }
+
+  public function handleProviderCallback()
+  {
+    $googleUser = Socialite::driver('google')->stateless()->user();
+
+    $user = User::updateOrCreate(
+      ['email' => $googleUser->getEmail()],
+      [
+        'name' => $googleUser->getName(),
+        'google_id' => $googleUser->getId(),
+        'password' => bcrypt(str()->random(16)),
+      ]
+    );
+    $token = auth('api')->login($user);
+
+    return redirect()->to("http://localhost:5173/auth/google-callback?token=$token&user=" . urlencode(json_encode([
+      'id' => $user->id,
+      'name' => $user->name,
+      'email' => $user->email,
+      'varsity' => $user->varsity,
+      'department' => $user->department,
+      'points' => $user->points
+    ])));
+    // return $this->respondWithToken($token, auth('api')->user());
   }
 }

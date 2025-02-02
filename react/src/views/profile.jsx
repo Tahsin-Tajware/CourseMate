@@ -117,8 +117,8 @@ const Profile = () => {
 
                 <Box display="flex" flexDirection="row" gap={1}>
 
-                  <Typography variant="body1">{auth.user.department},</Typography>
-                  <Typography variant="body1">{auth.user.varsity}</Typography>
+                  <Typography variant="body1">{userData.department ? userData.department : null},</Typography>
+                  <Typography variant="body1">{userData.varsity ? userData.varsity : null}</Typography>
                 </Box>
               </Box>
             </Box>
