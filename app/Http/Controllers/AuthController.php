@@ -8,6 +8,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\UpdateUserRequest;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -18,7 +21,8 @@ class AuthController extends Controller
       "email" => $validatedData["email"],
       "name" => $validatedData["name"],
       "password" => bcrypt($validatedData["password"]),
-
+      "varsity" => $validatedData["varsity"] ?? null,
+      "department" => $validatedData["department"] ?? null
     ]);
     $token = auth('api')->login($user);
 
@@ -82,5 +86,58 @@ class AuthController extends Controller
       'expires_in' => auth('api')->factory()->getTTL() * 60,
       'user' => $user
     ]);
+  }
+
+  //user defined
+  public function update(UpdateUserRequest $request, $id)
+  {
+    $user = User::find($id);
+
+    if (!$user) {
+      return response()->json(['error' => 'User not found'], 404);
+    }
+
+    // Check current password if a new password is provided
+    if ($request->filled('password')) {
+      if (!Hash::check($request->current_password, $user->password)) {
+        return response()->json(['error' => 'Current password is incorrect'], 403);
+      }
+
+      // Hash the new password
+      $user->password = bcrypt($request->password);
+    }
+    $user->fill($request->validated());
+    $user->save();
+    return response()->json($user, status: 201);
+  }
+
+  public function redirectToProvider()
+  {
+    return Socialite::driver('google')->stateless()->redirect();
+  }
+
+  public function handleProviderCallback()
+  {
+    $googleUser = Socialite::driver('google')->stateless()->user();
+
+    $user = User::updateOrCreate(
+      ['email' => $googleUser->getEmail()],
+      [
+        'name' => $googleUser->getName(),
+        'google_id' => $googleUser->getId(),
+        'password' => bcrypt(str()->random(16)),
+      ]
+    );
+    $token = auth('api')->login($user);
+
+    return redirect()->to("http://localhost:5173/auth/google-callback?token=$token&user=" . urlencode(json_encode([
+      'id' => $user->id,
+      'name' => $user->name,
+      'email' => $user->email,
+      'varsity' => $user->varsity,
+      'department' => $user->department,
+      'points' => $user->points
+    ])));
+    // return $this->respondWithToken($token, auth('api')->user());
   }
 }

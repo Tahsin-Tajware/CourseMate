@@ -8,15 +8,21 @@ import {
   Avatar,
   Popper,
   ClickAwayListener,
+  Collapse,
 } from "@mui/material";
-import { Notifications, Search as SearchIcon } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-
-const Navbar = () => {
+import {
+  Notifications,
+  Search as SearchIcon,
+  Menu as MenuIcon,
+} from "@mui/icons-material";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
+const Navbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [auth] = useAuth();
   const handleProfileClick = () => {
     navigate("/profile");
   };
@@ -26,8 +32,27 @@ const Navbar = () => {
     setAnchorEl(event.currentTarget);
   };
 
+  const handleNotificationMouseLeave = () => {
+    if (!notificationOpen) {
+      setAnchorEl(null);
+    }
+  };
+
   const handleClickAway = () => {
     setNotificationOpen(false);
+    setAnchorEl(null);
+  };
+
+  const handleLogoClick = () => {
+    navigate("/");
+  };
+
+  const handleSearchClick = () => {
+    setIsSearchExpanded(true);
+  };
+
+  const handleSearchBlur = () => {
+    setIsSearchExpanded(false);
   };
 
   return (
@@ -46,44 +71,55 @@ const Navbar = () => {
       zIndex={1000}
       sx={{ height: 72, borderBottom: "1px solid #e0e0e0" }}
     >
-      {/* Logo */}
+      <IconButton
+        edge="start"
+        color="inherit"
+        aria-label="menu"
+        onClick={onToggleSidebar}
+        sx={{ mr: 2, display: { sm: "none" }, color: "black" }}
+      >
+        <MenuIcon />
+      </IconButton>
+
       <Typography
         variant="h4"
         fontWeight="bold"
         color="inherit"
-        display="flex"
-        alignItems="center"
-        gap={0}
+        onClick={handleLogoClick}
+        sx={{
+          fontSize: { xs: "1.5rem", sm: "2rem" },
+          cursor: "pointer",
+        }}
       >
         <span style={{ color: "#000" }}>Course</span>
         <span style={{ color: "#FF6D00" }}>Mate</span>
       </Typography>
 
-      {/* Search Bar */}
-      <Paper
-        component="form"
+      <Box
         sx={{
-          display: "flex",
+          display: { xs: "flex", sm: "none" },
           alignItems: "center",
-          width: { xs: "70%", sm: "50%", md: "40%" },
-          borderRadius: "30px",
-          backgroundColor: "#f0f0f0",
-          px: 2,
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+          gap: 0.3,
         }}
       >
-        <InputBase
-          sx={{ flex: 1, fontSize: "14px", color: "#666", pl: 2 }}
-          placeholder="Search for questions or tags..."
-          inputProps={{ "aria-label": "search" }}
-        />
-        <IconButton type="submit" sx={{ p: "10px", color: "#FF6D00" }}>
-          <SearchIcon />
+        <IconButton
+          sx={{
+            color: "grey",
+            "&:hover": {
+              backgroundColor: "#f0f0f0",
+            },
+          }}
+          onClick={handleSearchClick}
+        >
+          <SearchIcon fontSize="medium" />
         </IconButton>
-      </Paper>
-
-      {/* Profile and Notifications */}
-      <Box display="flex" alignItems="center" gap={2}>
+        <IconButton
+          onClick={handleNotificationClick}
+          onMouseLeave={handleNotificationMouseLeave}
+          sx={{ color: "#555", "&:hover": { color: "#FF6D00" } }}
+        >
+          <Notifications />
+        </IconButton>
         <Avatar
           onClick={handleProfileClick}
           alt="Profile"
@@ -102,50 +138,134 @@ const Navbar = () => {
         >
           P
         </Avatar>
+      </Box>
+
+      <Collapse in={isSearchExpanded} timeout="auto" unmountOnExit>
+        <Paper
+          component="form"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+            borderRadius: "30px",
+            backgroundColor: "#f0f0f0",
+            px: 2,
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+            mt: 2,
+            position: "fixed",
+            top: 72,
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+          }}
+        >
+          <InputBase
+            sx={{
+              flex: 1,
+              fontSize: "14px",
+              color: "#666",
+              pl: 2,
+            }}
+            placeholder="Search for questions or tags..."
+            inputProps={{ "aria-label": "search" }}
+            onBlur={handleSearchBlur}
+            autoFocus
+          />
+          <IconButton type="submit" sx={{ p: "10px", color: "#FF6D00" }}>
+            <SearchIcon />
+          </IconButton>
+        </Paper>
+      </Collapse>
+
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: { xs: "none", sm: "flex" },
+          justifyContent: "center",
+          alignItems: "flex-start",
+        }}
+      >
+        <Paper
+          component="form"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            width: "70%",
+            borderRadius: "30px",
+            backgroundColor: "#f0f0f0",
+            px: 2,
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <IconButton type="submit" sx={{ p: "10px", color: "#666" }}>
+            <SearchIcon />
+          </IconButton>
+          <InputBase
+            sx={{
+              flex: 1,
+              fontSize: "14px",
+              color: "#666",
+              pl: 2,
+            }}
+            placeholder="Search for questions or tags..."
+            inputProps={{ "aria-label": "search" }}
+          />
+        </Paper>
+      </Box>
+
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={1}
+        sx={{ flexShrink: 0, display: { xs: "none", sm: "flex" } }}
+      >
         <IconButton
           onClick={handleNotificationClick}
+          onMouseLeave={handleNotificationMouseLeave}
           sx={{ color: "#555", "&:hover": { color: "#FF6D00" } }}
         >
           <Notifications />
         </IconButton>
-      </Box>
-
-      {/* Notification Popper */}
-      <Popper
-        open={notificationOpen}
-        anchorEl={anchorEl}
-        placement="bottom-end"
-        sx={{ zIndex: 1500 }}
-      >
-        <ClickAwayListener onClickAway={handleClickAway}>
-          <Box
+        {auth?.user?.name ?
+          <Avatar
+            onClick={handleProfileClick}
+            alt="Profile"
             sx={{
-              mt: 1,
-              width: 300,
-              maxHeight: 400,
-              bgcolor: "white",
-              border: "1px solid #e0e0e0",
-              borderRadius: "10px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-              p: 2,
+              width: 40,
+              height: 40,
+              backgroundColor: "#ccc",
+              fontSize: "18px",
+              color: "#fff",
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "#FF6D00",
+                color: "#fff",
+              },
             }}
           >
-            <Typography variant="subtitle1" fontWeight="bold" mb={1}>
-              Notifications
-            </Typography>
-            <Box display="flex" flexDirection="column" gap={1}>
-              {/* Example  */}
-              <Typography variant="body2" color="text.secondary">
-                🔔 You have a new message.
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                📅 Your assignment deadline is tomorrow.
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                🎉 New comment on your post.
-              </Typography>
-            </Box>
-          </Box>
+            {auth?.user?.name?.charAt(0)}
+          </Avatar> :
+          <Link to='/login' className=" font-semibold hover:text-orange-600 "> Sign In</Link>
+        }
+      </Box>
+
+      <Popper
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        placement="bottom-end"
+        disablePortal
+      >
+        <ClickAwayListener onClickAway={handleClickAway}>
+          <Paper
+            sx={{
+              mt: 1,
+              p: 2,
+              width: 300,
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <Typography variant="body1">No new notifications</Typography>
+          </Paper>
         </ClickAwayListener>
       </Popper>
     </Box>

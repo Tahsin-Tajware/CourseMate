@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserRegisterRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
   /**
    * Determine if the user is authorized to make this request.
@@ -21,13 +21,19 @@ class UserRegisterRequest extends FormRequest
    */
   public function rules(): array
   {
-    return [
-      "email" => "required|string|unique:users|max:255",
+    $userId = $this->route('id');
+    $rules = [
       'name' => "required|string|max:255|min:3",
-      "password" => "required|string|min:6|max:50",
       'varsity' => "nullable|string|max:255",
       'department' => "nullable|string|max:255",
-      'confirm_password' => "same:password"
     ];
+    if ($this->filled('password')) {
+      $rules = array_merge($rules, [
+        'current_password' => 'required|string',
+        'password' => 'required|string|min:6|max:50',
+        'confirm_password' => 'same:password'
+      ]);
+    }
+    return $rules;
   }
 }
