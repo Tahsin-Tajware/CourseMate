@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/authContext";
 import { customAxios } from "../api/axiosPrivate";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import loginImage from "../image/login_sideimage.png";
 import Sidebar from "../views/Sidebar";
+import Swal from "sweetalert2";
 
+import google_img from '../../public/assets/google_img.png'
+const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const Login = () => {
   const [auth, setAuth] = useAuth();
   const [formData, setFormData] = useState({
@@ -17,6 +20,11 @@ const Login = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const googleLogin = () => {
+    window.location.href = `${VITE_BASE_URL}/auth/google`;
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -71,6 +79,7 @@ const Login = () => {
     };
   }, []);
 
+
   return (
     <div className="flex items-center justify-center h-screen bg-white fixed inset-0 sm:pl-60">
       <Sidebar isOpen={false} onClose={() => { }} />
@@ -119,9 +128,16 @@ const Login = () => {
               Sign in
             </button>
           </form>
-          <p className="text-center text-gray-600 mt-4">
+          <p className="text-center text-gray-600 mt-4 mb-4">
             Don’t have an account? <a href="/register" className="text-green-700 font-bold hover:underline">Sign Up</a>
           </p>
+          <button
+            onClick={googleLogin}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg shadow-md hover:bg-gray-100 transition w-full"
+          >
+            <img src={google_img} alt="Google" className="w-5 h-5" />
+            <span >Sign in with Google</span>
+          </button>
         </div>
 
 
