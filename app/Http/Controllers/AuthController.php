@@ -11,19 +11,32 @@ use Illuminate\Http\Request;
 use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
   public function register(UserRegisterRequest $request)
   {
     $validatedData = $request->validated();
-    $user = User::create([
+    // $user = User::create([
+    //   "email" => $validatedData["email"],
+    //   "name" => $validatedData["name"],
+    //   "password" => bcrypt($validatedData["password"]),
+    //   "varsity" => $validatedData["varsity"] ?? null,
+    //   "department" => $validatedData["department"] ?? null
+    // ]);
+
+
+    $userId = DB::table('users')->insertGetId([
       "email" => $validatedData["email"],
       "name" => $validatedData["name"],
       "password" => bcrypt($validatedData["password"]),
       "varsity" => $validatedData["varsity"] ?? null,
-      "department" => $validatedData["department"] ?? null
+      "department" => $validatedData["department"] ?? null,
+      "created_at" => now(),
+      "updated_at" => now()
     ]);
+    $user = User::find($userId);
     $token = auth('api')->login($user);
 
     return $this->respondWithToken($token, $user);
@@ -35,7 +48,6 @@ class AuthController extends Controller
     if (! $token = auth('api')->attempt($credentials)) {
       return response()->json(['error' => 'Unauthorized'], 401);
     }
-
     return $this->respondWithToken($token, auth('api')->user());
   }
 
@@ -91,7 +103,7 @@ class AuthController extends Controller
   //user defined
   public function update(UpdateUserRequest $request, $id)
   {
-    $user = User::find($id);
+    $user = DB::table('users')->where('id', $id)->first();
 
     if (!$user) {
       return response()->json(['error' => 'User not found'], 404);
@@ -104,11 +116,15 @@ class AuthController extends Controller
       }
 
       // Hash the new password
-      $user->password = bcrypt($request->password);
+      $newPassword = bcrypt($request->password);
+      DB::table('users')->where('id', $id)->update(['password' => $newPassword]);
     }
-    $user->fill($request->validated());
-    $user->save();
-    return response()->json($user, status: 201);
+
+    $validatedData = $request->validated();
+    DB::table('users')->where('id', $id)->update($validatedData);
+
+    $updatedUser = DB::table('users')->where('id', $id)->first();
+    return response()->json($updatedUser, status: 201);
   }
 
   public function redirectToProvider()
