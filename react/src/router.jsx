@@ -4,6 +4,7 @@ import Home from './views/home'
 import Login from './auth/login'
 import Profile from './views/profile'
 import Layout from './views/Layout'
+import About from './views/About.jsx'
 import AuthCallback from './auth/google-callback.jsx'
 const router = createBrowserRouter([
   {
@@ -13,9 +14,11 @@ const router = createBrowserRouter([
       { path: '/register', element: <Register /> },
       { path: '/login', element: <Login /> },
       { path: '/profile', element: <Profile /> },
+      { path: '/about', element: <About /> },
       { path: "/auth/google-callback", element: <AuthCallback /> }
     ],
   },
+
 ])
 
 export default router

@@ -32,6 +32,46 @@ const Home = () => {
       answers: 5,
       content: "Here's another example of a post with similar styling.",
     },
+    {
+      id: 3,
+      username: "Rahim",
+      time: "20 mins",
+      votes: 35,
+      answers: 3,
+      content: "This is a third example post with some interesting content.",
+    },
+    {
+      id: 4,
+      username: "Karim",
+      time: "15 mins",
+      votes: 60,
+      answers: 7,
+      content: "Check out this post for more details on the topic.",
+    },
+    {
+      id: 5,
+      username: "Jamal",
+      time: "10 mins",
+      votes: 25,
+      answers: 1,
+      content: "I have a question about the recent updates. Can anyone help?",
+    },
+    {
+      id: 6,
+      username: "Farid",
+      time: "5 mins",
+      votes: 40,
+      answers: 4,
+      content: "Here's a post about the latest trends in technology.",
+    },
+    {
+      id: 7,
+      username: "Nasim",
+      time: "2 mins",
+      votes: 30,
+      answers: 6,
+      content: "Let's discuss the best practices for coding in React.",
+    },
   ];
 
   return (
@@ -88,3 +128,4 @@ const Home = () => {
 };
 
 export default Home;
+
