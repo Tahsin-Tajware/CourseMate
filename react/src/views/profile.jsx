@@ -76,7 +76,13 @@ const Profile = () => {
         user: response.data,
       });
     } catch (err) {
-      console.error("Failed to update profile:", err);
+      if (err.response?.data?.errors) {
+        setEditErrors(err.response.data.errors); // Set errors from the response
+      } else {
+        console.error("Failed to update profile:", err);
+        toast.error(err.response?.data?.error || "An error occurred", {
+        });
+      }
     } finally {
       setLoading(false);
 
@@ -89,7 +95,7 @@ const Profile = () => {
     <Box display="flex" flexDirection="column" alignItems="center" gap={3} p={3}>
       {userData ? (
         <Box display="flex" flexDirection="column" gap={3} width="100%" maxWidth="800px">
-
+          <Toaster richColors />
           <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
             <Box display="flex" alignItems="center" gap={2} flex="1">
               <Avatar

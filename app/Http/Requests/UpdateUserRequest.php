@@ -31,7 +31,7 @@ class UpdateUserRequest extends FormRequest
       $rules = array_merge($rules, [
         'current_password' => 'required|string',
         'password' => 'required|string|min:6|max:50',
-        'confirm_password' => 'same:password'
+        'confirm_password' => 'required|same:password'
       ]);
     }
     return $rules;
