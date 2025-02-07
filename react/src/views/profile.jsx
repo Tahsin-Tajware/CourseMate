@@ -119,10 +119,12 @@ const Profile = () => {
       });
     } catch (err) {
       if (err.response?.data?.errors) {
+
         setEditErrors(err.response.data.errors);
       } else {
         console.error("Failed to update profile:", err);
         toast.error(err.response?.data?.error || "Failed to update profile. Please try again.",{  
+
         });
       }
     } finally {
