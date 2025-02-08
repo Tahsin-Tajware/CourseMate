@@ -25,24 +25,26 @@ const Profile = () => {
   const [error, setError] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [editData, setEditData] = useState({ 
-    name: "", 
-    varsity: "", 
-    department: "", 
-    current_password: "", 
-    password: "", 
-    confirm_password: "" 
+  const [editData, setEditData] = useState({
+    name: "",
+    varsity: "",
+    department: "",
+    current_password: "",
+    password: "",
+    confirm_password: ""
   });
   const [filteredUniversities, setFilteredUniversities] = useState([]);
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
-  const [editErrors, setEditErrors] = useState({}); 
-
+  const [editErrors, setEditErrors] = useState({});
+  const [no_of_my_post, set_no_of_my_post] = useState(0);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await axiosPrivate.post("/me", {});
         setUserData(response.data);
+        const res = await axiosPrivate.get('/no_of_my_post');
+        set_no_of_my_post(res.data.posts);
       } catch (err) {
         if (err.response?.status === 401) {
           setError("Unauthorized! Please log in again.");
@@ -67,9 +69,9 @@ const Profile = () => {
   };
 
   const handleEditOpen = () => {
-    setEditData({ 
-      name: userData.name, 
-      varsity: userData.varsity, 
+    setEditData({
+      name: userData.name,
+      varsity: userData.varsity,
       department: userData.department,
     });
     setEditOpen(true);
@@ -106,16 +108,16 @@ const Profile = () => {
   };
 
   const handleEditSave = async () => {
-     setEditErrors({});
-     setLoading(true);
+    setEditErrors({});
+    setLoading(true);
     try {
       const response = await axiosPrivate.put(`/update-profile/${userData.id}`, editData);
       setUserData(response.data);
       setEditOpen(false);
       localStorage.setItem('user', JSON.stringify(response.data));
       setAuth({
-      ...auth,
-      user: response.data,
+        ...auth,
+        user: response.data,
       });
     } catch (err) {
       if (err.response?.data?.errors) {
@@ -123,7 +125,7 @@ const Profile = () => {
         setEditErrors(err.response.data.errors);
       } else {
         console.error("Failed to update profile:", err);
-        toast.error(err.response?.data?.error || "Failed to update profile. Please try again.",{  
+        toast.error(err.response?.data?.error || "Failed to update profile. Please try again.", {
 
         });
       }
@@ -201,7 +203,7 @@ const Profile = () => {
                 borderRadius={1}
               >
                 <Typography variant="h6" fontWeight="bold">
-                  1
+                  {no_of_my_post}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
                   Post
@@ -293,42 +295,48 @@ const Profile = () => {
                   onChange={(e) => setEditData({ ...editData, department: e.target.value })}
                   SelectProps={{
                     native: true,
-                  }} 
+                  }}
                 >
-                  <option value="">Select Department</option>
+                  <option value=""></option>
                   {departments.map((dept, index) => (
                     <option key={index} value={dept}>
                       {dept}
                     </option>
                   ))}
                 </TextField>
-                <TextField
-                  type="password"
-                  label="Current Password"
-                  value={editData.current_password}
-                  onChange={(e) => setEditData({ ...editData, current_password: e.target.value })}
-                  fullWidth
-                  error={!!editErrors.current_password}
-                  helperText={editErrors.current_password ? editErrors.current_password[0] : ""}
-                />
-                <TextField
-                  type="password"
-                  label="New Password"
-                  value={editData.password}
-                  onChange={(e) => setEditData({ ...editData, password: e.target.value })}
-                  fullWidth
-                  error={!!editErrors.password}
-                  helperText={editErrors.password ? editErrors.password[0] : ""}
-                />
-                <TextField
-                  type="password"
-                  label="Confirm Password"
-                  value={editData.confirm_password}
-                  onChange={(e) => setEditData({ ...editData, confirm_password: e.target.value })}
-                  fullWidth
-                  error={!!editErrors.confirm_password}
-                  helperText={editErrors.confirm_password ? editErrors.confirm_password[0] : ""}
-                />
+                {!userData.google_id ?
+                  <TextField
+                    type="password"
+                    label="Current Password"
+                    value={editData.current_password}
+                    onChange={(e) => setEditData({ ...editData, current_password: e.target.value })}
+                    fullWidth
+                    error={!!editErrors.current_password}
+                    helperText={editErrors.current_password ? editErrors.current_password[0] : ""}
+                  />
+                  : null}
+                {!userData.google_id ?
+                  <TextField
+                    type="password"
+                    label="New Password"
+                    value={editData.password}
+                    onChange={(e) => setEditData({ ...editData, password: e.target.value })}
+                    fullWidth
+                    error={!!editErrors.password}
+                    helperText={editErrors.password ? editErrors.password[0] : ""}
+                  />
+                  : null}
+                {!userData.google_id ?
+                  <TextField
+                    type="password"
+                    label="Confirm New Password"
+                    value={editData.confirm_password}
+                    onChange={(e) => setEditData({ ...editData, confirm_password: e.target.value })}
+                    fullWidth
+                    error={!!editErrors.confirm_password}
+                    helperText={editErrors.confirm_password ? editErrors.confirm_password[0] : ""}
+                  />
+                  : null}
                 <Button variant="contained" color="primary" onClick={handleEditSave}>
                   {loading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "Save"}
                 </Button>

@@ -6,8 +6,8 @@ import Login from "./auth/login";
 import Profile from "./views/profile";
 import Layout from "./views/Layout";
 import AuthCallback from "./auth/google-callback.jsx";
-import AskQuestion from "./views/AskQuestion.jsx"; 
-
+import AskQuestion from "./views/AskQuestion.jsx";
+import ProtectedRoute from "./components/protectedRoute.jsx";
 import About from './views/About.jsx';
 
 const router = createBrowserRouter([
@@ -18,12 +18,17 @@ const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/register", element: <Register /> },
       { path: "/login", element: <Login /> },
-      { path: "/profile", element: <Profile /> },
       { path: "/auth/google-callback", element: <AuthCallback /> },
-      { path: "/ask-question", element: <AskQuestion /> },
-       { path: '/about', element: <About /> },
-     
+      { path: '/about', element: <About /> },
 
+      // Protected routes
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: "/profile", element: <Profile /> },
+          { path: "/ask-question", element: <AskQuestion /> },
+        ],
+      },
     ],
   },
 ]);

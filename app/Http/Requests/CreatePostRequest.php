@@ -25,7 +25,7 @@ class CreatePostRequest extends FormRequest
       'title' => 'required|string',
       'content' => 'required|string',
       'is_anonymous' => 'required|boolean',
-      'user_id' => 'required|exists:users,id',
+      //'user_id' => 'required|exists:users,id',
       'tags' => 'required|array',
       'tags.*.course_name' => 'required|string|max:255',
       'tags.*.course_code' => 'required|string|max:50',

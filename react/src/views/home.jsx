@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect, useState } from "react";
 import {
   Typography,
   Box,
@@ -13,9 +14,32 @@ import {
   Reply,
   ModeComment,
 } from "@mui/icons-material";
-
+import axiosPrivate from "../api/axiosPrivate";
+import { customAxios } from "../api/axiosPrivate";
+import { useAuth } from "../context/authContext";
 const Home = () => {
-  const posts = [
+
+  const [realPosts, setRealPosts] = useState([]);
+  const [auth] = useAuth();
+  useEffect(() => {
+    async function fetchPost() {
+      try {
+        if (!auth?.user) {
+          const response = await customAxios.get('/get-all-post');
+          setRealPosts(response.data.posts);
+        } else {
+          const response = await axiosPrivate.get('/get-all-post');
+          setRealPosts(response.data.posts);
+        }
+
+
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchPost();
+  }, []);
+  const dummyPosts = [
     {
       id: 1,
       username: "Sonod",
@@ -73,7 +97,7 @@ const Home = () => {
       content: "Let's discuss the best practices for coding in React.",
     },
   ];
-
+  const posts = [...realPosts, ...dummyPosts];
   return (
     <Box display="flex" flexDirection="column" gap={3}>
       <Typography variant="h5">Welcome to CourseMate!</Typography>
@@ -82,14 +106,14 @@ const Home = () => {
         and more.
       </Typography>
 
-      {posts.map((post) => (
+      {posts?.map((post) => (
         <Card key={post.id} sx={{ bgcolor: "mintcream", mb: 2 }}>
           <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Box display="flex" alignItems="center" gap={2}>
-              <Avatar>{post.username[0]}</Avatar>
-              <Typography variant="subtitle2">{post.username}</Typography>
+              <Avatar>{post.username?.charAt(0)}</Avatar>
+              <Typography variant="subtitle2">{post.username ? post.username : null}</Typography>
               <Typography variant="caption" color="text.secondary">
-                {post.time}
+                {post.time ? post.time : null}
               </Typography>
             </Box>
 

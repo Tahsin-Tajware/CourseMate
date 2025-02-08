@@ -97,13 +97,10 @@ class AuthController extends Controller
       return response()->json(['error' => 'User not found'], 404);
     }
 
-    // Check current password if a new password is provided
     if ($request->filled('password')) {
       if (!Hash::check($request->current_password, $user->password)) {
         return response()->json(['error' => 'Current password is incorrect'], 403);
       }
-
-      // Hash the new password
       $user->password = bcrypt($request->password);
     }
     $user->fill($request->validated());

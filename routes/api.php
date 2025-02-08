@@ -17,10 +17,14 @@ Route::group(
 );
 
 Route::post('refresh', [AuthController::class, 'refresh']);
+
+Route::get('get-all-post', [PostController::class, 'getAllPost']);
 //protected routes
 Route::middleware(['auth:api'])->group(function () {
   Route::post('me', [AuthController::class, 'me']);
   Route::post('logout', [AuthController::class, 'logout']);
   Route::put('update-profile/{id}', [AuthController::class, 'update']);
+
   Route::post('create-post', [PostController::class, 'createPost']);
+  Route::get('no_of_my_post', [PostController::class, 'getNoOfMyPosts']);
 });
