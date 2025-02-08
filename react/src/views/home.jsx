@@ -6,7 +6,7 @@ import {
   Card,
   CardContent,
   Avatar,
-  IconButton,
+  IconButton, Stack, Grid, Chip, Container
 } from "@mui/material";
 import {
   ArrowUpward,
@@ -17,6 +17,7 @@ import {
 import axiosPrivate from "../api/axiosPrivate";
 import { customAxios } from "../api/axiosPrivate";
 import { useAuth } from "../context/authContext";
+import { format, parseISO } from "date-fns";
 const Home = () => {
 
   const [realPosts, setRealPosts] = useState([]);
@@ -107,45 +108,82 @@ const Home = () => {
       </Typography>
 
       {posts?.map((post) => (
-        <Card key={post.id} sx={{ bgcolor: "mintcream", mb: 2 }}>
-          <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Avatar>{post.username?.charAt(0)}</Avatar>
-              <Typography variant="subtitle2">{post.username ? post.username : null}</Typography>
-              <Typography variant="caption" color="text.secondary">
-                {post.time ? post.time : null}
-              </Typography>
-            </Box>
 
-            <Typography variant="body2">{post.content}</Typography>
+        <Container maxWidth="md">
+          <Box display="flex" justifyContent="center" alignItems="center" >
+            <Card key={post.id} sx={{ bgcolor: "whitesmoke", borderRadius: 2, boxShadow: 3, width: "100%" }}>
+              <CardContent>
+                {/* Header: User Info with Date on Right */}
+                <Box display="flex" alignItems="center" justifyContent="space-between" >
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Avatar>{post.username?.charAt(0)}</Avatar>
+                    <Typography variant="subtitle2" fontWeight="bold">
+                      {post.username ? post.username : post.user.name}
+                    </Typography>
+                  </Box>
+                  <Typography variant="caption" color="text.secondary">
+                    {post.time ? post.time : format(parseISO(post.created_at), "MMMM d, yyyy h:mm a")}
+                  </Typography>
+                </Box>
 
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              mt={1}
-              px={1}
-              color="text.secondary"
-            >
-              <Box display="flex" alignItems="center" gap={1}>
-                <IconButton size="small" color="primary">
-                  <ArrowUpward fontSize="small" />
-                </IconButton>
-                <Typography variant="body2">{post.votes}</Typography>
-                <IconButton size="small" color="secondary">
-                  <ArrowDownward fontSize="small" />
-                </IconButton>
-              </Box>
-              <Box display="flex" alignItems="center" gap={1}>
-                <ModeComment fontSize="small" />
-                <Typography variant="body2">{post.answers} Answers</Typography>
-              </Box>
-              <IconButton size="small" color="inherit">
-                <Reply fontSize="small" />
-              </IconButton>
-            </Box>
-          </CardContent>
-        </Card>
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  {post.title}
+                </Typography>
+                <Typography variant="body2" color="text.primary" fontSize={20} textAlign='start' mb={7}>
+                  {post.content}
+                </Typography>
+
+                <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
+                  {post.tags?.map((tag, index) => (
+                    <Chip
+                      key={index}
+                      label={`${tag.course_code} - ${tag.course_name}`}
+                      color="primary"
+                      variant="outlined"
+                    />
+                  ))
+                  }
+                  <Chip
+                    label={post.tags?.[0].varsity}
+                    color="primary"
+                    variant="outlined"
+                  />
+                </Stack>
+
+                {/* Post Actions */}
+                <Grid container alignItems="center" justifyContent="space-between" mt={2}>
+                  {/* Voting System */}
+                  <Grid item display="flex" alignItems="center">
+                    <IconButton size="small" color="primary">
+                      <ArrowUpward fontSize="small" />
+                    </IconButton>
+                    <Typography variant="body2" fontWeight="bold">
+                      {post.votes}
+                    </Typography>
+                    <IconButton size="small" color="secondary">
+                      <ArrowDownward fontSize="small" />
+                    </IconButton>
+                  </Grid>
+
+                  {/* Comments */}
+                  <Grid item display="flex" alignItems="center">
+                    <ModeComment fontSize="small" color="action" />
+                    <Typography variant="body2" ml={0.5}>
+                      {post.answers} Answers
+                    </Typography>
+                  </Grid>
+
+                  {/* Reply Button */}
+                  <Grid item>
+                    <IconButton size="small">
+                      <Reply fontSize="small" />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          </Box>
+        </Container>
       ))}
     </Box>
   );

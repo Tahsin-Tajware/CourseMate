@@ -45,6 +45,7 @@ class PostService
     //   $posts = Post::all();
     //   return response()->json(['message' => 'Posts fetched successfully', 'posts' => $posts], 200);
     // }
-    return Post::all();
+    $posts = Post::with(['user', 'tags'])->get();
+    return $posts;
   }
 }
