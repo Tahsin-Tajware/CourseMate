@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\SavedPostController;
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
 // })->middleware('auth:sanctum');
@@ -27,4 +28,7 @@ Route::middleware(['auth:api'])->group(function () {
 
   Route::post('create-post', [PostController::class, 'createPost']);
   Route::get('no_of_my_post', [PostController::class, 'getNoOfMyPosts']);
+  Route::post('save-post/{post_id}', [SavedPostController::class, 'save_post']);
+  Route::delete('unsave-post/{post_id}', [SavedPostController::class, 'delete_saved_post']);
+  Route::get('saved-post', [SavedPostController::class, 'get_saved_posts']);
 });

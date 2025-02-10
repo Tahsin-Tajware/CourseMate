@@ -60,6 +60,15 @@ class User extends Authenticatable implements JWTSubject
     return $this->getKey();
   }
 
+  public function post()
+  {
+    return $this->hasMany(Post::class);
+  }
+  public function savedPost()
+  {
+    return $this->belongsToMany(Post::class, 'saved_post', 'user_id', 'post_id')->with('user', 'tags');
+  }
+
   /**
    * Return a key value array, containing any custom claims to be added to the JWT.
    *
