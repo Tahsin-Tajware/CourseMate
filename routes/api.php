@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SavedPostController;
 // Route::get('/user', function (Request $request) {
@@ -20,6 +21,8 @@ Route::group(
 Route::post('refresh', [AuthController::class, 'refresh']);
 
 Route::get('get-all-post', [PostController::class, 'getAllPost']);
+
+Route::get('comment/{post_id}', [CommentController::class, 'getAllComments']);
 //protected routes
 Route::middleware(['auth:api'])->group(function () {
   Route::post('me', [AuthController::class, 'me']);
@@ -31,4 +34,8 @@ Route::middleware(['auth:api'])->group(function () {
   Route::post('save-post/{post_id}', [SavedPostController::class, 'save_post']);
   Route::delete('unsave-post/{post_id}', [SavedPostController::class, 'delete_saved_post']);
   Route::get('saved-post', [SavedPostController::class, 'get_saved_posts']);
+
+  Route::post('comment/{post_id}', [CommentController::class, 'storeComment']);
+  Route::delete('comment/{comment_id}', [CommentController::class, 'deleteComment']);
+  Route::put('update-comment/{comment_id}', [CommentController::class, 'updateComment']);
 });
