@@ -18,11 +18,18 @@ Route::group(
   }
 );
 
+Route::group(
+  ['prefix' => 'admin'],
+  function () {
+    Route::post('auth/login', [AuthController::class, 'adminLogin']);
+  }
+);
+
+//no access token needed
 Route::post('refresh', [AuthController::class, 'refresh']);
-
 Route::get('get-all-post', [PostController::class, 'getAllPost']);
-
 Route::get('comment/{post_id}', [CommentController::class, 'getAllComments']);
+
 //protected routes
 Route::middleware(['auth:api'])->group(function () {
   Route::post('me', [AuthController::class, 'me']);

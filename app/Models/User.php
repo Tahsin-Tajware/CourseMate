@@ -24,7 +24,6 @@ class User extends Authenticatable implements JWTSubject
     'password',
     'varsity',
     'department',
-    'role',
     'points',
     'google_id'
   ];
@@ -42,7 +41,9 @@ class User extends Authenticatable implements JWTSubject
     'updated_at',
     'role',
   ];
-
+  protected $guarded = [
+    'role',
+  ];
   /**
    * Get the attributes that should be cast.
    *

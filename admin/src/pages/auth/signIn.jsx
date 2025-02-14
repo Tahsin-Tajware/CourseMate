@@ -3,18 +3,16 @@ import { useState } from "react";
 import { Typography, Box, Button } from "@mui/material";
 import CustomTextField from "./CustomTextField";
 import { Link, useNavigate } from 'react-router-dom'
-// import customAxios from '../../../../frontend/src/api/axiosPrivate'
-// import axios from '../../api/axios';
-import axios from "axios";
-//import logo from '../../assets/logo.png'
-//import { useAuth } from '../../../../frontend/src/context/auth'
+import { customAxios } from "../../api/axiosPrivate";
+
+import { useAuth } from "../../context/authContext";
 const SignIn = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [errMsg, setErrMsg] = useState('');
-  //const [auth, setAuth] = useAuth();
+  const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
   const validateForm = () => {
     const newErrors = {};
@@ -29,9 +27,16 @@ const SignIn = () => {
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
       try {
-        
-        localStorage.setItem('auth', JSON.stringify(res.data));
-        console.log(auth.userInfo)
+        const response = await customAxios.post('/admin/auth/login', { email, password });
+
+        setAuth({
+          ...auth,
+          user_admin: response.data.user,
+          token_admin: response.data.access_token,
+        });
+        localStorage.setItem("token_admin", response.data.access_token);
+        localStorage.setItem('user_admin', JSON.stringify(response.data.user));
+
         navigate('/');
 
       } catch (err) {
@@ -51,20 +56,21 @@ const SignIn = () => {
   return (
 
     <div className="border rounded-xl p-7 max-w-[420px] mx-auto my-7 border-black flex-col justify-center">
-      <Box sx={{ bgcolor: 'blue', display: "flex", maxWidth: '420px', alignItems: "center", justifyContent: 'center' }}>
+      {/* <Box sx={{ bgcolor: 'red', display: "flex", maxWidth: '420px', alignItems: "center", justifyContent: 'center' }}> */}
       <div className="items-center flex justify-center">
+        <div className="font-extrabold  text-5xl "> Course Mate </div>
         {/* <img src={logo} alt="logo" className="w-[30%] h-[50%] " /> */}
       </div>
       <Box sx={{
         width: '100%', maxWidth: '420px',
         display: "flex", flexDirection: 'column',
-        bgcolor: 'white', justifyContent: 'flex-start', alignItems: "center"
+        bgcolor: 'transparent', justifyContent: 'flex-start', alignItems: "center"
       }}>
         {/* <Typography variant="h5" sx={{ color: 'black', display: 'flex', alignSelf: 'flex-start', mb: '20px' }}>
           Sign in to your account
         </Typography> */}
         <CustomTextField label="email" onChange={(e) => { setEmail(e.target.value) }} errors={errors} />
-        <CustomTextField label="password" onChange={(e) => { setPassword(e.target.value) }} errors={errors} />
+        <CustomTextField label="password" type="password" onChange={(e) => { setPassword(e.target.value) }} errors={errors} />
 
 
         <Button onClick={handleSubmit} variant="contained" sx={{
@@ -83,7 +89,7 @@ const SignIn = () => {
           </Typography>
           <Link to='/signup' > <div className="font-semibold hover:font-bold"> help </div>  </Link>
         </Box>
-      </Box>
+        {/* </Box> */}
       </Box>
     </div>
 
