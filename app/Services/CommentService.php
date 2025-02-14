@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\Models\Comment;
+// use Google\Client;
+use GuzzleHttp\Client;
+use Illuminate\Support\Facades\DB;
 
 class CommentService
 {
@@ -37,5 +40,25 @@ class CommentService
       return ['message' => 'Comment updated successfully'];
     }
     return ['error' => 'Comment not found'];
+  }
+  public function analyzeComment($text)
+  {
+    $apiKey = env('GOOGLE_PERSPECTIVE_API_KEY');
+    $url = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=$apiKey";
+    $client = new Client();
+    $response = $client->post($url, [
+      'json' => [
+        "comment" => ["text" => $text],
+        "languages" => ["en"],
+        "requestedAttributes" => [
+          "TOXICITY" => new \stdClass()
+        ]
+      ]
+    ]);
+
+    $result = json_decode($response->getBody(), true);
+    $res = $result['attributeScores']['TOXICITY']['summaryScore']['value'] ?? 0;
+
+    return $res;
   }
 }

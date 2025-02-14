@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\CommentService;
+use Illuminate\Support\Facades\DB;
 
 class CommentController extends Controller
 {
@@ -18,8 +19,19 @@ class CommentController extends Controller
       'content' => 'required|string',
       'parent_id' => 'nullable|exists:comment,id'
     ]);
+
     $comment = $this->commentService->storeComment($validatedData, $post_id);
-    return response()->json(['comment' => $comment], 201);
+    $toxicityScore = $this->commentService->analyzeComment($validatedData['content']);
+    if ($toxicityScore > 0.75) {
+      DB::table('toxic_score')->insert([
+        'toxic_score' => $toxicityScore,
+        'comment_id' => $comment->id,
+        'user_id' => auth('api')->user()->id,
+        'created_at' => now(),
+        'updated_at' => now()
+      ]);
+    }
+    return response()->json(['comment' => $comment, 'toxic' => $toxicityScore], 201);
   }
   public function getAllComments($post_id)
   {

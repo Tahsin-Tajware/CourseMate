@@ -17,6 +17,7 @@ return [
     'client_id' => env('GOOGLE_CLIENT_ID'),
     'client_secret' => env('GOOGLE_CLIENT_SECRET'),
     'redirect' => env('GOOGLE_REDIRECT_URI'),
+    'perspective_api_key' => env('GOOGLE_PERSPECTIVE_API_KEY'),
   ],
   'postmark' => [
     'token' => env('POSTMARK_TOKEN'),
