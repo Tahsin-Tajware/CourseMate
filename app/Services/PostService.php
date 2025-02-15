@@ -48,4 +48,34 @@ class PostService
     $posts = Post::with(['user', 'tags'])->get();
     return $posts;
   }
+  public function updatePost(array $validatedData, $post_id)
+  {
+    $post = Post::find($post_id);
+    $user_id = auth('api')->user()->id;
+    if (!$post) {
+      return ['error' => 'post not found'];
+    }
+    if ($user_id != $post->user_id) {
+      return ['error' => 'invalid request'];
+    }
+    $post->title = $validatedData['title'];
+    $post->content = $validatedData['content'];
+
+    if (!empty($validatedData['tags'])) {
+      $tagIds = [];
+      foreach ($validatedData['tags'] as $tagData) {
+        $tag = Tag::firstOrCreate([
+          'course_code' => $tagData['course_code'],
+          'course_name' => $tagData['course_name'],
+          'varsity' => $tagData['varsity'],
+        ]);
+        $tagIds[] = $tag->id;
+      }
+      $post->tags()->sync($tagIds);
+    }
+
+    $post->save();
+
+    return $post->load('tags');
+  }
 }

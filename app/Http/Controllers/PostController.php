@@ -38,4 +38,28 @@ class PostController extends Controller
     $posts = $this->postService->getAllPosts();
     return response()->json(['message' => 'Posts fetched successfully', 'posts' => $posts], 200);
   }
+  public function getMyPost()
+  {
+    $user = auth('api')->user();
+    $post = $user->post()->with('tags')->get();
+    return response()->json(['message' => 'Post fetched successfully', 'post' => $post], 200);
+  }
+  public function getPostById($post_id)
+  {
+    $post = Post::find($post_id);
+    if ($post) {
+      return response()->json(['message' => 'Post fetched successfully', 'post' => $post], 200);
+    } else {
+      return response()->json(['message' => 'Post not found'], 404);
+    }
+  }
+  public function updatePost($id, CreatePostRequest $request)
+  {
+    $validatedData = $request->validated();
+    $data = $this->postService->updatePost($validatedData, $id);
+    if (isset($data['error'])) {
+      return response()->json(['message' => $data['error']]);
+    }
+    return response()->json(['message' => 'Post updated successfully', 'post' => $data], 200);
+  }
 }
