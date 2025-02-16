@@ -78,4 +78,16 @@ class PostService
 
     return $post->load('tags');
   }
+  public function deletePost($post_id){
+    $post = Post::find($post_id);
+    $user_id = auth('api')->user()->id;
+    if (!$post) {
+      return ['error' => 'post not found'];
+    }
+    if ($user_id!= $post->user_id) {
+      return ['error' => 'invalid request'];
+    }
+    $post->delete();
+    return ['message' => 'post deleted successfully'];
+  }
 }

@@ -71,7 +71,7 @@ const Navbar = ({ onToggleSidebar }) => {
       left={0}
       width="100%"
       zIndex={1000}
-      sx={{ height: 40, borderBottom: "1px solid #333" }}
+      sx={{ height: 75, borderBottom: "1px solid #333" }}
     >
       <IconButton
         edge="start"
