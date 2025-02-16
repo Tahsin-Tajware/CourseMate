@@ -41,6 +41,7 @@ Route::middleware(['auth:api'])->group(function () {
   Route::get('no_of_my_post', [PostController::class, 'getNoOfMyPosts']);
   Route::get('my_post', [PostController::class, 'getMyPost']);
   Route::put('update_post/{post_id}', [PostController::class, 'updatePost']);
+  Route::delete('delete_post/{post_id}', [PostController::class, 'deletePost']);
 
   Route::post('save-post/{post_id}', [SavedPostController::class, 'save_post']);
   Route::delete('unsave-post/{post_id}', [SavedPostController::class, 'delete_saved_post']);

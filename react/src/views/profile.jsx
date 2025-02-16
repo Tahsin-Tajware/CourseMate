@@ -38,6 +38,8 @@ const Profile = () => {
   const navigate = useNavigate();
   const [editErrors, setEditErrors] = useState({});
   const [no_of_my_post, set_no_of_my_post] = useState(0);
+  const [value, setValue] = useState(0);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -54,10 +56,10 @@ const Profile = () => {
       }
     };
     fetchProfile();
-  }, [auth, setAuth]);
+  }, [auth]);
 
   const handleLogout = async () => {
-    const response = await axiosPrivate.post("/logout", {});
+    await axiosPrivate.post("/logout", {});
     localStorage.removeItem('access_token');
     localStorage.removeItem('user');
     setAuth({
@@ -121,16 +123,21 @@ const Profile = () => {
       });
     } catch (err) {
       if (err.response?.data?.errors) {
-
         setEditErrors(err.response.data.errors);
       } else {
         console.error("Failed to update profile:", err);
-        toast.error(err.response?.data?.error || "Failed to update profile. Please try again.", {
-
-        });
+        toast.error(err.response?.data?.error || "Failed to update profile. Please try again.", {});
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setValue(newValue);
+
+    if (newValue === 1) {
+      navigate('/myposts');
     }
   };
 
@@ -162,8 +169,8 @@ const Profile = () => {
                   {userData.email}
                 </Typography>
                 <Box display="flex" flexDirection="row" gap={1}>
-                  <Typography variant="body1">{userData.department ? userData.department : null},</Typography>
-                  <Typography variant="body1">{userData.varsity ? userData.varsity : null}</Typography>
+                  <Typography variant="body1">{userData.department},</Typography>
+                  <Typography variant="body1">{userData.varsity}</Typography>
                 </Box>
               </Box>
             </Box>
@@ -182,7 +189,7 @@ const Profile = () => {
             </Button>
           </Box>
 
-          <Tabs value={0} variant="scrollable" scrollButtons="auto" sx={{ borderBottom: "1px solid #e0e0e0" }}>
+          <Tabs value={value} onChange={handleTabChange} variant="scrollable" scrollButtons="auto" sx={{ borderBottom: "1px solid #e0e0e0" }}>
             <Tab label="Overview" />
             <Tab label="Posts" />
             <Tab label="Comments" />
@@ -192,59 +199,27 @@ const Profile = () => {
             <Tab label="Downvoted" />
           </Tabs>
 
-          <Grid container spacing={2} mt={2}>
-            <Grid item xs={6}>
-              <Box
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-                p={2}
-                border="1px solid #ddd"
-                borderRadius={1}
-              >
-                <Typography variant="h6" fontWeight="bold">
-                  {no_of_my_post}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Post
-                </Typography>
-              </Box>
+          {value === 0 && (
+            <Grid container spacing={2} mt={2}>
+              <Grid item xs={6}>
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  p={2}
+                  border="1px solid #ddd"
+                  borderRadius={1}
+                >
+                  <Typography variant="h6" fontWeight="bold">
+                    {no_of_my_post}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Posts
+                  </Typography>
+                </Box>
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <Box
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-                p={2}
-                border="1px solid #ddd"
-                borderRadius={1}
-              >
-                <Typography variant="h6" fontWeight="bold">
-                  12
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Followers
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-
-          <Box mt={3} p={2} border="1px solid #ddd" borderRadius={1}>
-            <Typography variant="body2" fontWeight="bold" mb={1}>
-              LINKS
-            </Typography>
-            <Button
-              variant="outlined"
-              color="primary"
-              fullWidth
-              sx={{
-                textTransform: "none",
-                borderStyle: "dashed",
-              }}
-            >
-              + Add Social Link
-            </Button>
-          </Box>
+          )}
 
           <Modal open={editOpen} onClose={handleEditClose}>
             <Box

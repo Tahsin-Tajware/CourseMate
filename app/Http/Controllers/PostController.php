@@ -46,7 +46,8 @@ class PostController extends Controller
   }
   public function getPostById($post_id)
   {
-    $post = Post::find($post_id);
+    $post = Post::with('tags', 'user')->where('id', $post_id)->first();
+
     if ($post) {
       return response()->json(['message' => 'Post fetched successfully', 'post' => $post], 200);
     } else {
@@ -61,5 +62,12 @@ class PostController extends Controller
       return response()->json(['message' => $data['error']]);
     }
     return response()->json(['message' => 'Post updated successfully', 'post' => $data], 200);
+  }
+  public function deletePost($post_id){
+    $data = $this->postService->deletePost($post_id);
+    if (isset($data['error'])) {
+      return response()->json(['message' => $data['error']], 404);
+    }
+    return response()->json(['message' => 'Post deleted successfully'], 200);
   }
 }

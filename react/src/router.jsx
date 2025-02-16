@@ -9,7 +9,8 @@ import AuthCallback from "./auth/google-callback.jsx";
 import AskQuestion from "./views/AskQuestion.jsx";
 import ProtectedRoute from "./components/protectedRoute.jsx";
 import About from './views/About.jsx';
-
+import PostPage from "./views/PostPage";
+import UpdatePost from "./views/updatePost.jsx";
 const router = createBrowserRouter([
   {
     element: <Layout />,
@@ -27,6 +28,11 @@ const router = createBrowserRouter([
         children: [
           { path: "/profile", element: <Profile /> },
           { path: "/ask-question", element: <AskQuestion /> },
+          { path: "/myposts", element: <PostPage /> },
+          { path: "/edit-post/:postId", element: <UpdatePost /> },
+
+
+         
         ],
       },
     ],
