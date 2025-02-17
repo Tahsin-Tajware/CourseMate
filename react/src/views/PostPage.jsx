@@ -16,9 +16,12 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  IconButton,
+  Menu,
+  MenuItem
 } from "@mui/material";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import { Edit as EditIcon, Delete as DeleteIcon, MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { Toaster, toast } from "sonner";
 
 const PostPage = () => {
@@ -28,6 +31,8 @@ const PostPage = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
   const [highlightPostId, setHighlightPostId] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [currentPostId, setCurrentPostId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,11 +67,13 @@ const PostPage = () => {
 
   const handleEdit = (postId) => {
     navigate(`/edit-post/${postId}`);
+    handleCloseMenu();
   };
 
   const handleDeleteConfirmation = (postId) => {
     setPostToDelete(postId);
     setOpenDialog(true);
+    handleCloseMenu();
   };
 
   const handleDelete = async () => {
@@ -87,6 +94,16 @@ const PostPage = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setPostToDelete(null);
+  };
+
+  const handleClick = (event, postId) => {
+    setAnchorEl(event.currentTarget);
+    setCurrentPostId(postId);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setCurrentPostId(null);
   };
 
   if (loading) return <CircularProgress sx={{ position: 'absolute', top: '50%', left: '50%' }} />;
@@ -144,33 +161,66 @@ const PostPage = () => {
                   }
                 />
                 <ListItemSecondaryAction sx={{ display: 'flex', flexDirection: 'column' }}>
-                  <Button
-                    variant="contained"
-                    startIcon={<EditIcon />}
-                    onClick={() => handleEdit(post.id)}
-                    sx={{
-                      mb: 1,
-                      bgcolor: '#117a0b',
-                      color: '#fff',
-                      textTransform: 'none',
-                      '&:hover': { bgcolor: '#25b81d' }
+                  <IconButton
+                    aria-label="more"
+                    aria-controls="long-menu"
+                    aria-haspopup="true"
+                    onClick={(event) => handleClick(event, post.id)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    id="long-menu"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl) && currentPostId === post.id}
+                    onClose={handleCloseMenu}
+                    anchorOrigin={{
+                      vertical: 'center',
+                      horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                      vertical: 'center',
+                      horizontal: 'right',
+                    }}
+                    PaperProps={{
+                      style: {
+                        width: '220px',
+                        borderRadius: '8px',
+                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                        backgroundColor: '#e0dede', 
+                      },
                     }}
                   >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="contained"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => handleDeleteConfirmation(post.id)}
-                    sx={{
-                      bgcolor: '#f44336',
-                      color: '#fff',
-                      textTransform: 'none',
-                      '&:hover': { bgcolor: '#e53935' }
-                    }}
-                  >
-                    Delete this post
-                  </Button>
+                    <MenuItem
+                      onClick={() => handleEdit(post.id)}
+                      sx={{
+                        backgroundColor: '#109423', 
+                        color: '#fff',
+                        '&:hover': { backgroundColor: '#0d6b1a' },
+                        borderRadius: '4px',
+                        mx: 1,
+                        my: 0.5,
+                      }}
+                    >
+                      <EditIcon sx={{ mr: 2 }} />
+                      Edit post
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => handleDeleteConfirmation(post.id)}
+                      sx={{
+                        backgroundColor: '#dc3545', 
+                        color: '#fff',
+                        '&:hover': { backgroundColor: '#c82333' },
+                        borderRadius: '4px',
+                        mx: 1,
+                        my: 0.5,
+                      }}
+                    >
+                      <DeleteIcon sx={{ mr: 2 }} />
+                      Delete this post
+                    </MenuItem>
+                  </Menu>
                 </ListItemSecondaryAction>
               </ListItem>
               <Divider component="li" />
