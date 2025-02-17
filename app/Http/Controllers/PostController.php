@@ -63,11 +63,17 @@ class PostController extends Controller
     }
     return response()->json(['message' => 'Post updated successfully', 'post' => $data], 200);
   }
-  public function deletePost($post_id){
+  public function deletePost($post_id)
+  {
     $data = $this->postService->deletePost($post_id);
     if (isset($data['error'])) {
       return response()->json(['message' => $data['error']], 404);
     }
     return response()->json(['message' => 'Post deleted successfully'], 200);
+  }
+  public function getPostsByTag($tag_id)
+  {
+    $posts = Tag::find($tag_id)->posts()->with('tags', 'user')->get();
+    return response()->json(['message' => 'Posts fetched successfully', 'posts' => $posts], 200);
   }
 }

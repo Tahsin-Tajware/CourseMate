@@ -185,20 +185,22 @@ const PostPage = () => {
                     }}
                     PaperProps={{
                       style: {
-                        width: '220px',
+                        width: '160px',
                         borderRadius: '8px',
-                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-                        backgroundColor: '#e0dede', 
+                        //boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                        backgroundColor: 'transparent',
                       },
                     }}
                   >
                     <MenuItem
                       onClick={() => handleEdit(post.id)}
                       sx={{
-                        backgroundColor: '#109423', 
+                        backgroundColor: '#2e5550',
                         color: '#fff',
-                        '&:hover': { backgroundColor: '#0d6b1a' },
-                        borderRadius: '4px',
+                        '&:hover': { backgroundColor: '#08594f' },
+                        borderRadius: '24px',
+                        height: '50px',
+                        width: '150px',
                         mx: 1,
                         my: 0.5,
                       }}
@@ -209,16 +211,18 @@ const PostPage = () => {
                     <MenuItem
                       onClick={() => handleDeleteConfirmation(post.id)}
                       sx={{
-                        backgroundColor: '#dc3545', 
+                        backgroundColor: '#dc3545',
                         color: '#fff',
                         '&:hover': { backgroundColor: '#c82333' },
-                        borderRadius: '4px',
+                        borderRadius: '24px',
+                        height: '50px',
+                        width: '150px',
                         mx: 1,
                         my: 0.5,
                       }}
                     >
                       <DeleteIcon sx={{ mr: 2 }} />
-                      Delete this post
+                      Delete post
                     </MenuItem>
                   </Menu>
                 </ListItemSecondaryAction>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Typography,
   Box,
@@ -32,7 +33,7 @@ const Home = () => {
   const [auth] = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const navigate = useNavigate();
   useEffect(() => {
     async function fetchPost() {
       try {
@@ -111,6 +112,9 @@ const Home = () => {
 
   const posts = [...realPosts, ...dummyPosts];
 
+  const handleGetPostByTag = (tag_id, course_code, course_name) => {
+    navigate(`/posts-by-tag/${tag_id}`, { state: { message: `${course_code} - ${course_name}` } });
+  }
   // Sort posts by date
   const sortedPosts = posts.sort((a, b) =>
     new Date(b.created_at || b.time) - new Date(a.created_at || a.time)
@@ -171,6 +175,7 @@ const Home = () => {
                           margin: '4px',
                           border: `1px solid ${theme.palette.grey[400]}`,
                         }}
+                        onClick={() => handleGetPostByTag(tag.id, tag.course_code, tag.course_name)}
                       />
                     ))}
                     {post.tags?.[0] && (

@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/protectedRoute.jsx";
 import About from './views/About.jsx';
 import PostPage from "./views/PostPage";
 import UpdatePost from "./views/updatePost.jsx";
+import PostByTag from "./views/postByTag.jsx";
 const router = createBrowserRouter([
   {
     element: <Layout />,
@@ -21,7 +22,7 @@ const router = createBrowserRouter([
       { path: "/login", element: <Login /> },
       { path: "/auth/google-callback", element: <AuthCallback /> },
       { path: '/about', element: <About /> },
-
+      { path: "/posts-by-tag/:tag_id", element: <PostByTag /> },
       // Protected routes
       {
         element: <ProtectedRoute />,
@@ -32,7 +33,7 @@ const router = createBrowserRouter([
           { path: "/edit-post/:postId", element: <UpdatePost /> },
 
 
-         
+
         ],
       },
     ],

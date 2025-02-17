@@ -21,7 +21,7 @@ class CommentService
   }
   public function getAllComments($post_id)
   {
-    return Comment::whereNull('parent_id')->where('post_id', $post_id)->with('replies')->get();
+    return Comment::whereNull('parent_id')->where('post_id', $post_id)->with('replies', 'user')->get();
   }
   public function deleteComment($comment_id)
   {

@@ -30,7 +30,7 @@ Route::post('refresh', [AuthController::class, 'refresh']);
 Route::get('get-all-post', [PostController::class, 'getAllPost']);
 Route::get('comment/{post_id}', [CommentController::class, 'getAllComments']);
 Route::get('post_by_id/{post_id}', [PostController::class, 'getPostById']);
-
+Route::get('post_by_tag/{tag_id}', [PostController::class, 'getPostsByTag']);
 //protected routes
 Route::middleware(['auth:api'])->group(function () {
   Route::post('me', [AuthController::class, 'me']);
