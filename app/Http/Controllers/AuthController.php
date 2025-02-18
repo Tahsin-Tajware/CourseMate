@@ -33,8 +33,7 @@ class AuthController extends Controller
       "password" => bcrypt($validatedData["password"]),
       "varsity" => $validatedData["varsity"] ?? null,
       "department" => $validatedData["department"] ?? null,
-      "created_at" => now(),
-      "updated_at" => now()
+      'role' => 'user',
     ]);
     $user = User::find($userId);
     $token = auth('api')->login($user);
@@ -48,6 +47,17 @@ class AuthController extends Controller
     if (! $token = auth('api')->attempt($credentials)) {
       return response()->json(['error' => 'Unauthorized'], 401);
     }
+    return $this->respondWithToken($token, auth('api')->user());
+  }
+
+  public function adminLogin()
+  {
+    $credentials = request(['email', 'password']);
+
+    if ((! $token = auth('api')->attempt($credentials)) || auth('api')->user()->role != 'admin') {
+      return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
     return $this->respondWithToken($token, auth('api')->user());
   }
 
@@ -109,22 +119,15 @@ class AuthController extends Controller
       return response()->json(['error' => 'User not found'], 404);
     }
 
-    // Check current password if a new password is provided
     if ($request->filled('password')) {
       if (!Hash::check($request->current_password, $user->password)) {
         return response()->json(['error' => 'Current password is incorrect'], 403);
       }
-
-      // Hash the new password
-      $newPassword = bcrypt($request->password);
-      DB::table('users')->where('id', $id)->update(['password' => $newPassword]);
+      $user->password = bcrypt($request->password);
     }
-
-    $validatedData = $request->validated();
-    DB::table('users')->where('id', $id)->update($validatedData);
-
-    $updatedUser = DB::table('users')->where('id', $id)->first();
-    return response()->json($updatedUser, status: 201);
+    $user->fill($request->validated());
+    $user->save();
+    return response()->json($user, status: 201);
   }
 
   public function redirectToProvider()

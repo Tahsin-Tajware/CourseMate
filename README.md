@@ -31,7 +31,7 @@ University students seeking help with course materials or topics and willing to 
 
 ### Frontend
 
--   **Framework/Library**: React with Inertia.js
+-   **Framework/Library**: React
 
 ### Rendering Method
 

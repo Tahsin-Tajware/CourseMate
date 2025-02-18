@@ -136,7 +136,7 @@ const Navbar = ({ onToggleSidebar }) => {
             },
           }}
         >
-          P
+          {auth?.user?.name?.charAt(0)}
         </Avatar>
       </Box>
 
