@@ -22,9 +22,9 @@ class PostController extends Controller
     $validatedData = $request->validated();
     $userId = auth('api')->user()->id;
 
-    $post = $this->postService->createPost($validatedData, $userId);
+    $this->postService->createPost($validatedData, $userId);
 
-    return response()->json(['message' => 'Post created successfully', 'post' => $post->load('tags')], 201);
+    return response()->json(['message' => 'Post created successfully'], 201);
   }
 
   public function getNoOfMyPosts()

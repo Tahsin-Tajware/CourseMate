@@ -10,27 +10,56 @@ class PostService
 {
   public function createPost(array $validatedData, int $userId)
   {
-    $post = Post::create([
-      'title' => $validatedData['title'],
-      'content' => $validatedData['content'],
-      'is_anonymous' => $validatedData['is_anonymous'],
-      'user_id' => $userId,
+    DB::insert("
+        INSERT INTO posts (title, content, is_anonymous, user_id, created_at, updated_at) 
+        VALUES (?, ?, ?, ?, NOW(), NOW())
+    ", [
+      $validatedData['title'],
+      $validatedData['content'],
+      $validatedData['is_anonymous'],
+      $userId
     ]);
+
+
+    $postId = DB::getPdo()->lastInsertId();
+
 
     if (!empty($validatedData['tags'])) {
       $tagIds = [];
       foreach ($validatedData['tags'] as $tagData) {
-        $tag = Tag::firstOrCreate([
-          'course_code' => $tagData['course_code'],
-          'course_name' => $tagData['course_name'],
-          'varsity' => $tagData['varsity'],
-        ]);
-        $tagIds[] = $tag->id;
-      }
-      $post->tags()->attach($tagIds);
-    }
 
-    return $post->load('tags');
+        $existingTag = DB::select("
+                SELECT id FROM tags WHERE course_code = ? AND course_name = ? AND varsity = ?
+            ", [
+          $tagData['course_code'],
+          $tagData['course_name'],
+          $tagData['varsity']
+        ]);
+
+        if (empty($existingTag)) {
+
+          DB::insert("
+                    INSERT INTO tags (course_code, course_name, varsity, created_at, updated_at)
+                    VALUES (?, ?, ?, NOW(), NOW())
+                ", [
+            $tagData['course_code'],
+            $tagData['course_name'],
+            $tagData['varsity']
+          ]);
+
+          $tagId = DB::getPdo()->lastInsertId();
+        } else {
+          $tagId = $existingTag[0]->id;
+        }
+
+        $tagIds[] = $tagId;
+      }
+      foreach ($tagIds as $tagId) {
+        DB::insert("
+                INSERT INTO post_tag (post_id, tag_id) VALUES (?, ?)
+            ", [$postId, $tagId]);
+      }
+    }
   }
   public function getNoOfPostsByUser(int $userId)
   {
