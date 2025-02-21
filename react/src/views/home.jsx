@@ -111,7 +111,9 @@ const Home = () => {
   ];
 
   const posts = [...realPosts, ...dummyPosts];
-
+  const handleNavigatePostById = (post_id) => {
+    navigate(`/post/${post_id}`);
+  }
   const handleGetPostByTag = (tag_id, course_code, course_name) => {
     navigate(`/posts-by-tag/${tag_id}`, { state: { message: `${course_code} - ${course_name}` } });
   }
@@ -139,7 +141,8 @@ const Home = () => {
             {sortedPosts.map((post) => (
               <Card
                 key={post.id}
-                sx={{ bgcolor: "background.paper", borderRadius: 2, boxShadow: 3, mb: 3, width: '100%' }}
+                sx={{ bgcolor: "background.paper", borderRadius: 2, boxShadow: 3, mb: 3, width: '100%', cursor: "pointer" }}
+                onClick={() => handleNavigatePostById(post.id)}
               >
                 <CardContent>
                   {/* Header: User Info with Date on Right */}
