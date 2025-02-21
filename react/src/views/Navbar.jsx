@@ -17,12 +17,14 @@ import {
 } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
+import axiosPrivate from "../api/axiosPrivate";
 const Navbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [auth] = useAuth();
+  const [notifications, setNotifications] = useState([]);
   const handleProfileClick = () => {
     navigate("/profile");
   };
@@ -30,6 +32,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const handleNotificationClick = (event) => {
     setNotificationOpen((prev) => !prev);
     setAnchorEl(event.currentTarget);
+    fetchNotifications();
   };
 
   const handleNotificationMouseLeave = () => {
@@ -54,7 +57,15 @@ const Navbar = ({ onToggleSidebar }) => {
   const handleSearchBlur = () => {
     setIsSearchExpanded(false);
   };
+  const fetchNotifications = async () => {
+    try {
+      const res = await axiosPrivate.get('notification ')
 
+      setNotifications(res.data);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
   return (
     <Box
       component="nav"
@@ -114,7 +125,7 @@ const Navbar = ({ onToggleSidebar }) => {
           <SearchIcon fontSize="medium" />
         </IconButton>
         <IconButton
-          onClick={handleNotificationClick}
+          onClick={() => handleNotificationClick}
           onMouseLeave={handleNotificationMouseLeave}
           sx={{ color: "#555", "&:hover": { color: "#FF6D00" } }}
         >
@@ -263,8 +274,16 @@ const Navbar = ({ onToggleSidebar }) => {
               width: 300,
               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
             }}
-          >
-            <Typography variant="body1">No new notifications</Typography>
+          >{
+              notifications ?
+
+                notifications.map((notification) => (
+                  <Typography variant="body1">{notification.data.message} </Typography>
+                )) :
+
+                <Typography variant="body1">No new notifications</Typography>
+            }
+
           </Paper>
         </ClickAwayListener>
       </Popper>
