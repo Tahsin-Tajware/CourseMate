@@ -132,7 +132,7 @@ const PostById = () => {
       <Box
         key={comment.id}
         sx={{
-          borderLeft: `4px solid ${theme.palette.grey[300]}`,
+          borderLeft: `1px solid ${theme.palette.grey[300]}`,
           borderRadius: '8px 0 0 8px',
           pl: 2,
           mb: 2,
