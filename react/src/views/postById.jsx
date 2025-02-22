@@ -98,8 +98,13 @@ const PostById = () => {
   const handleDeleteComment = async (commentId) => {
     try {
       await axiosPrivate.delete(`/comment/${commentId}`);
-      setComments(comments.filter((comment) => comment.id !== commentId));
-      handleMenuClose(); // Close the menu after deleting a comment
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment.id !== commentId).map((comment) => ({
+          ...comment,
+          replies: comment.replies?.filter((reply) => reply.id !== commentId),
+        }))
+      );
+      handleMenuClose();
     } catch (error) {
       console.error("Error deleting comment:", error);
     }
