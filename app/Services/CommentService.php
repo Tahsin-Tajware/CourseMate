@@ -46,4 +46,10 @@ class CommentService
         $result = json_decode($response->getBody(), true);
         return $result['attributeScores']['TOXICITY']['summaryScore']['value'] ?? 0;
     }
+
+    public function deleteComment($comment_id)
+    {
+        $comment = Comment::findOrFail($comment_id);
+        $comment->delete();
+    }
 }

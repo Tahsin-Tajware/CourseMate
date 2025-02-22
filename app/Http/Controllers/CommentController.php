@@ -18,14 +18,14 @@ class CommentController extends Controller
     {
         $validatedData = $request->validate([
             'content' => 'required|string',
-            'parent_id' => 'nullable|exists:comment,id'
+            'parent_id' => 'nullable|exists:comments,id'
         ]);
 
         $comment = $this->commentService->storeComment($validatedData, $post_id);
         $toxicityScore = $this->commentService->analyzeComment($validatedData['content']);
 
         if ($toxicityScore > 0.75) {
-           
+          
         }
 
         return response()->json(['comment' => $comment, 'toxic' => $toxicityScore], 201);
@@ -35,5 +35,15 @@ class CommentController extends Controller
     {
         $comments = $this->commentService->getAllComments($post_id);
         return response()->json(['comments' => $comments], 200);
+    }
+
+    public function deleteComment($comment_id)
+    {
+        try {
+            $this->commentService->deleteComment($comment_id);
+            return response()->json(['message' => 'Comment deleted successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Comment not found or could not be deleted'], 404);
+        }
     }
 }

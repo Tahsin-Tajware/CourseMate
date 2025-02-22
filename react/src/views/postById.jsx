@@ -62,7 +62,6 @@ const PostById = () => {
       try {
         const res = await customAxios.get(`/comment/${post_id}`);
         setComments(res.data.comments || []);
-        // Expand all parent comments by default
         const initialExpanded = {};
         res.data.comments.forEach((comment) => {
           if (!comment.parent_id) {
@@ -100,6 +99,7 @@ const PostById = () => {
     try {
       await axiosPrivate.delete(`/comment/${commentId}`);
       setComments(comments.filter((comment) => comment.id !== commentId));
+      handleMenuClose(); // Close the menu after deleting a comment
     } catch (error) {
       console.error("Error deleting comment:", error);
     }
@@ -198,10 +198,10 @@ const PostById = () => {
               id="comment-menu"
               anchorEl={anchorEl}
               keepMounted
-              open={Boolean(anchorEl)}
+              open={Boolean(anchorEl) && currentCommentId === comment.id}
               onClose={handleMenuClose}
             >
-              <MenuItem onClick={() => handleDeleteComment(currentCommentId)}>Delete</MenuItem>
+              <MenuItem onClick={() => handleDeleteComment(comment.id)}>Delete</MenuItem>
               <MenuItem onClick={handleMenuClose}>Report</MenuItem>
             </Menu>
           </Box>
