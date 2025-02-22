@@ -34,6 +34,7 @@ const Home = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
+
   useEffect(() => {
     async function fetchPost() {
       try {
@@ -51,74 +52,16 @@ const Home = () => {
     fetchPost();
   }, [auth]);
 
-  const dummyPosts = [
-    {
-      id: 1,
-      username: "Sonod",
-      time: "30 mins",
-      votes: 50,
-      answers: 2,
-      content: "This is an example post content for the first post.",
-    },
-    {
-      id: 2,
-      username: "Tamim",
-      time: "25 mins",
-      votes: 48,
-      answers: 5,
-      content: "Here's another example of a post with similar styling.",
-    },
-    {
-      id: 3,
-      username: "Rahim",
-      time: "20 mins",
-      votes: 35,
-      answers: 3,
-      content: "This is a third example post with some interesting content.",
-    },
-    {
-      id: 4,
-      username: "Karim",
-      time: "15 mins",
-      votes: 60,
-      answers: 7,
-      content: "Check out this post for more details on the topic.",
-    },
-    {
-      id: 5,
-      username: "Jamal",
-      time: "10 mins",
-      votes: 25,
-      answers: 1,
-      content: "I have a question about the recent updates. Can anyone help?",
-    },
-    {
-      id: 6,
-      username: "Farid",
-      time: "5 mins",
-      votes: 40,
-      answers: 4,
-      content: "Here's a post about the latest trends in technology.",
-    },
-    {
-      id: 7,
-      username: "Nasim",
-      time: "2 mins",
-      votes: 30,
-      answers: 6,
-      content: "Let's discuss the best practices for coding in React.",
-    },
-  ];
-
-  const posts = [...realPosts, ...dummyPosts];
   const handleNavigatePostById = (post_id) => {
     navigate(`/post/${post_id}`);
   }
+
   const handleGetPostByTag = (tag_id, course_code, course_name) => {
     navigate(`/posts-by-tag/${tag_id}`, { state: { message: `${course_code} - ${course_name}` } });
   }
+
   // Sort posts by date
-  const sortedPosts = posts.sort((a, b) =>
+  const sortedPosts = realPosts.sort((a, b) =>
     new Date(b.created_at || b.time) - new Date(a.created_at || a.time)
   );
 
@@ -215,7 +158,7 @@ const Home = () => {
                     <Grid item display="flex" alignItems="center">
                       <ModeComment fontSize="small" color="action" />
                       <Typography variant="body2" ml={0.5}>
-                        {post.answers} Answers
+                        {post.comments?.length || 0} Answers
                       </Typography>
                     </Grid>
 
@@ -247,7 +190,7 @@ const Home = () => {
                       color: theme.palette.text.primary,
                       borderRadius: 1,
                       fontWeight: 'bold',
-                      margin: '8px 4px', // Increased bottom margin for vertical spacing
+                      margin: '8px 4px',
                       border: `1px solid ${theme.palette.grey[400]}`,
                     }}
                   />
