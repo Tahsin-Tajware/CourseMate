@@ -32,7 +32,7 @@ import {
 } from "@mui/icons-material";
 import { format, parseISO } from "date-fns";
 import axiosPrivate from "../api/axiosPrivate";
-
+import { useAuth } from "../context/authContext";
 const PostById = () => {
   const { post_id } = useParams();
   const [post, setPost] = useState(null);
@@ -44,38 +44,42 @@ const PostById = () => {
   const [currentCommentId, setCurrentCommentId] = useState(null);
   const [showAllComments, setShowAllComments] = useState(false);
   const [expandedComments, setExpandedComments] = useState({});
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editContent, setEditContent] = useState("");
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const [auth] = useAuth();
+  const fetchComments = async () => {
+    try {
+      const res = await customAxios.get(`/comment/${post_id}`);
+      setComments(res.data.comments || []);
+      const initialExpanded = {};
+      res.data.comments.forEach((comment) => {
+        if (!comment.parent_id) {
+          initialExpanded[comment.id] = true;
+        }
+      });
+      setExpandedComments(initialExpanded);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const res = await customAxios.get(`/post_by_id/${post_id}`);
         setPost(res.data.post);
-        fetchComments();
+
       } catch (error) {
         console.error("Error fetching post:", error);
       }
     };
 
-    const fetchComments = async () => {
-      try {
-        const res = await customAxios.get(`/comment/${post_id}`);
-        setComments(res.data.comments || []);
-        const initialExpanded = {};
-        res.data.comments.forEach((comment) => {
-          if (!comment.parent_id) {
-            initialExpanded[comment.id] = true;
-          }
-        });
-        setExpandedComments(initialExpanded);
-      } catch (error) {
-        console.error("Error fetching comments:", error);
-      }
-    };
 
+    fetchComments();
     fetchPost();
-  }, [post_id]);
+  }, [post_id,]);
 
   const handleAddComment = async (parentId = null) => {
     const commentContent = parentId ? replyContent : newComment;
@@ -86,9 +90,11 @@ const PostById = () => {
           parent_id: parentId,
         });
         setComments((prevComments) => [...prevComments, res.data.comment]);
+        fetchComments();
         setNewComment("");
         setReplyContent("");
         setReplyingTo(null);
+
       } catch (error) {
         console.error("Error adding comment:", error);
       }
@@ -108,6 +114,24 @@ const PostById = () => {
     } catch (error) {
       console.error("Error deleting comment:", error);
     }
+  };
+  const handleEditComment = async (comment_id) => {
+    try {
+      await axiosPrivate.put(`/update-comment/${comment_id}`, { content: editContent });
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment.id === comment_id ? { ...comment, content: editContent } : comment
+        )
+      );
+      setEditingCommentId(null);
+      handleMenuClose();
+    } catch (error) {
+      console.error("Error updating comment:", error);
+    }
+  }
+  const handleEditClick = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditContent(comment.content);
   };
 
   const handleMenuOpen = (event, commentId) => {
@@ -163,12 +187,40 @@ const PostById = () => {
           </Box>
           <Typography variant="caption" color="text.secondary" ml={2}>
             {format(parseISO(comment.created_at), "MMMM d, yyyy h:mm a")}
+            {comment.updated_at !== comment.created_at && (
+              <Typography variant="caption" color="text.secondary" sx={{ fontStyle: "italic", marginLeft: 1 }}>
+                (Edited)
+              </Typography>
+            )}
           </Typography>
         </Box>
         <Collapse in={expandedComments[comment.id]} timeout="auto" unmountOnExit>
-          <Typography variant="body1" color="text.primary" sx={{ wordBreak: 'break-word', textAlign: 'left', marginLeft: 7 }}>
+          {editingCommentId === comment.id ? (
+            <Box mt={2} display="flex" alignItems="center" gap={1}>
+              <TextField
+                label="Edit Comment"
+                variant="outlined"
+                fullWidth
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                sx={{ flexGrow: 1 }}
+              />
+              <Button variant="contained" color="primary" onClick={() => handleEditComment(comment.id)}>
+                Save
+              </Button>
+              <Button variant="text" color="secondary" onClick={() => setEditingCommentId(null)}>
+                Cancel
+              </Button>
+            </Box>
+          ) : (
+            <Typography variant="body1" color="text.primary" sx={{ wordBreak: 'break-word', textAlign: 'left', marginLeft: 7 }}>
+              {comment.content}
+            </Typography>
+          )}
+
+          {/* <Typography variant="body1" color="text.primary" sx={{ wordBreak: 'break-word', textAlign: 'left', marginLeft: 7 }}>
             {comment.content}
-          </Typography>
+          </Typography> */}
           <Box display="flex" alignItems="center" gap={1} mt={1}>
             <IconButton size="small" color="primary">
               <ArrowUpward fontSize="small" />
@@ -206,8 +258,21 @@ const PostById = () => {
               open={Boolean(anchorEl) && currentCommentId === comment.id}
               onClose={handleMenuClose}
             >
-              <MenuItem onClick={() => handleDeleteComment(comment.id)}>Delete</MenuItem>
-              <MenuItem onClick={handleMenuClose}>Report</MenuItem>
+
+              {
+                comment.user_id === auth?.user?.id ?
+                  <>
+                    <MenuItem onClick={() => handleEditClick(comment)}>Edit</MenuItem>
+                    <MenuItem onClick={() => handleDeleteComment(comment.id)}>Delete</MenuItem>
+                  </>
+                  : null
+              }
+              {
+                comment.user_id !== auth?.user?.id ?
+                  <MenuItem onClick={handleMenuClose}>Report</MenuItem>
+                  : null
+              }
+
             </Menu>
           </Box>
           {replyingTo === comment.id && (

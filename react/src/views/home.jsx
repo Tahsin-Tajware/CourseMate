@@ -121,7 +121,10 @@ const Home = () => {
                           margin: '4px',
                           border: `1px solid ${theme.palette.grey[400]}`,
                         }}
-                        onClick={() => handleGetPostByTag(tag.id, tag.course_code, tag.course_name)}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          handleGetPostByTag(tag.id, tag.course_code, tag.course_name)
+                        }}
                       />
                     ))}
                     {post.tags?.[0] && (
@@ -158,7 +161,7 @@ const Home = () => {
                     <Grid item display="flex" alignItems="center">
                       <ModeComment fontSize="small" color="action" />
                       <Typography variant="body2" ml={0.5}>
-                        {post.comments?.length || 0} Answers
+                        {post.comment_count} Answers
                       </Typography>
                     </Grid>
 
