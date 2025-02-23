@@ -7,6 +7,8 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\DatabaseMessage;
 use App\Models\Comment;
+use App\Models\User;
+use Illuminate\Support\Str;
 
 class CommentNotification extends Notification implements ShouldQueue
 {
@@ -38,10 +40,12 @@ class CommentNotification extends Notification implements ShouldQueue
 
   private function getMessage()
   {
+    $userName = User::where('id', $this->comment->user_id)->value('name');
+    $preview = Str::limit($this->comment->content, 50, '...');
     if ($this->type === 'new') {
-      return "New comment on your post.";
+      return "$userName commented on your post:\n \"$preview\"";
     } elseif ($this->type === 'reply') {
-      return "Someone replied to your comment.";
+      return "$userName replied to your comment:\n \"$preview\" .";
     } elseif ($this->type === 'update') {
       return "A comment you interacted with has been updated.";
     }

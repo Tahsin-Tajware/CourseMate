@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Comment;
-// use Google\Client;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\CommentNotification;
@@ -41,9 +40,12 @@ class CommentService
 
     return $comment;
   }
+
   public function getAllComments($post_id)
   {
-    return Comment::whereNull('parent_id')->where('post_id', $post_id)->with('replies', 'user')->get();
+    return Comment::whereNull('parent_id')->where('post_id', $post_id)->with('replies', 'user')
+      ->orderBy('created_at', 'desc')
+      ->get();
   }
   public function deleteComment($comment_id)
   {
@@ -69,6 +71,7 @@ class CommentService
     }
     return ['message' => 'Comment updated successfully', 'comment' => $comment];
   }
+
   public function analyzeComment($text)
   {
     $apiKey = env('GOOGLE_PERSPECTIVE_API_KEY');
@@ -85,8 +88,21 @@ class CommentService
     ]);
 
     $result = json_decode($response->getBody(), true);
-    $res = $result['attributeScores']['TOXICITY']['summaryScore']['value'] ?? 0;
-
-    return $res;
+    return $result['attributeScores']['TOXICITY']['summaryScore']['value'] ?? 0;
   }
+
+  // public function deleteComment($comment_id)
+  // {
+  //   $comment = Comment::findOrFail($comment_id);
+  //   $comment->delete();
+  // }
+  // public function editComment($comment_id, array $validatedData)
+  // {
+  //   $comment = Comment::find($comment_id);
+  //   if ($comment) {
+  //     $comment->update($validatedData);
+  //     return ['message' => 'Comment updated successfully'];
+  //   }
+  //   return ['error' => 'Comment not found'];
+  // }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Paper,
@@ -8,16 +8,19 @@ import {
   Avatar,
   Popper,
   ClickAwayListener,
-  Collapse,
+  Collapse, Menu, MenuItem, Tooltip
 } from "@mui/material";
 import {
   Notifications,
   Search as SearchIcon,
   Menu as MenuIcon,
 } from "@mui/icons-material";
+import Badge from "@mui/material/Badge";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import axiosPrivate from "../api/axiosPrivate";
+import { Edit as EditIcon, Delete as DeleteIcon, MoreVert as MoreVertIcon } from "@mui/icons-material";
+import BeenhereOutlinedIcon from '@mui/icons-material/BeenhereOutlined';
 const Navbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -25,6 +28,17 @@ const Navbar = ({ onToggleSidebar }) => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [auth] = useAuth();
   const [notifications, setNotifications] = useState([]);
+  const [count_unread, setCountUnread] = useState(0);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const openMenu = Boolean(menuAnchorEl);
+
+  const handleMenuClick = (event) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
   const handleProfileClick = () => {
     navigate("/profile");
   };
@@ -59,13 +73,61 @@ const Navbar = ({ onToggleSidebar }) => {
   };
   const fetchNotifications = async () => {
     try {
-      const res = await axiosPrivate.get('notification ')
+      if (auth?.user) {
+        const res = await axiosPrivate.get('/notification ')
+        setNotifications(res.data);
+      }
 
-      setNotifications(res.data);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   };
+  const fetchUnreadNotifications = async () => {
+    try {
+      if (auth?.user) {
+        const res = await axiosPrivate.get('/notification/unread')
+        setNotifications(res.data);
+        return res.data
+      }
+    } catch (error) {
+      console.error("Error fetching unread notifications:", error);
+    }
+    handleMenuClose();
+  }
+  useEffect(() => {
+    if (auth?.user) {
+      const unreadCount = async () => {
+        const res = await axiosPrivate.get('/notification/count');
+        setCountUnread(res.data.count);
+      }
+      unreadCount();
+    }
+
+  }, [auth?.user])
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await axiosPrivate.post('/notification/mark-all-as-read')
+      fetchNotifications();
+
+    } catch (error) {
+      console.log(error)
+    }
+    handleMenuClose();
+  }
+
+  const handleNavigatePostById = (post_id, noti_id) => {
+    navigate(`/post/${post_id}`);
+    handleMarkAsRead(noti_id);
+  }
+  const handleMarkAsRead = async (id) => {
+    try {
+      await axiosPrivate.post(`/notification/mark-as-read/${id}`)
+      fetchNotifications()
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <Box
       component="nav"
@@ -233,9 +295,12 @@ const Navbar = ({ onToggleSidebar }) => {
         <IconButton
           onClick={handleNotificationClick}
           onMouseLeave={handleNotificationMouseLeave}
-          sx={{ color: "#555", "&:hover": { color: "#FF6D00" } }}
+          sx={{ color: "#555", "&:hover": { color: "#FF6D00" }, ...(notificationOpen && { color: "#FF6D00" }) }}
         >
-          <Notifications />
+          <Badge badgeContent={count_unread} color="error">
+            <Notifications fontSize="medium" />
+          </Badge>
+
         </IconButton>
         {auth?.user?.name ?
           <Avatar
@@ -260,30 +325,80 @@ const Navbar = ({ onToggleSidebar }) => {
         }
       </Box>
 
-      <Popper
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        placement="bottom-end"
-        disablePortal
-      >
+      <Popper open={Boolean(anchorEl)} anchorEl={anchorEl} placement="bottom-end" disablePortal>
         <ClickAwayListener onClickAway={handleClickAway}>
           <Paper
             sx={{
               mt: 1,
-              p: 2,
               width: 300,
+              maxHeight: 600, // Set max height for scroll
+              //overflowY: "auto", // Enable scrolling
               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              borderRadius: "8px",
+              backgroundColor: "#fff",
             }}
-          >{
-              notifications ?
+          >
+            <div className="p-4 border-b flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
 
+              {/* Three-dot Menu */}
+              <IconButton onClick={handleMenuClick} size="small">
+                <MoreVertIcon />
+              </IconButton>
+
+              <Menu
+                anchorEl={menuAnchorEl}
+                open={openMenu}
+                onClose={handleMenuClose}
+                PaperProps={{
+                  style: {
+                    maxHeight: 200,
+                    width: "200px",
+                    //backgroundColor: ''
+                  },
+                }}
+              >
+                <MenuItem sx={{
+                  color: 'orangered', "&:hover": {
+                    backgroundColor: "#ffeddf",
+                  },
+                }} onClick={handleMarkAllAsRead}>Mark All as Read</MenuItem>
+                <MenuItem sx={{
+                  color: 'orangered', "&:hover": {
+                    backgroundColor: "#ffeddf",
+                  },
+                }} onClick={fetchUnreadNotifications}>Show Unread</MenuItem>
+              </Menu>
+            </div>
+
+            <ul className="max-h-72 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <li className="text-gray-500 text-sm p-3">No new notifications</li>
+              ) : (
                 notifications.map((notification) => (
-                  <Typography variant="body1">{notification.data.message} </Typography>
-                )) :
+                  <li
+                    key={notification.id}
+                    className={`p-3 border-b cursor-pointer flex justify-between items-center transition duration-200 ${notification.read_at === null ? "bg-gray-100" : "bg-white hover:bg-gray-200"
+                      }`}
+                    onClick={() => handleNavigatePostById(notification.data.post_id, notification.id)} //navigate(`post/${notification.data.post_id}`)
 
-                <Typography variant="body1">No new notifications</Typography>
-            }
-
+                  >
+                    <span className="text-sm text-gray-700">{notification.data.message}</span>
+                    {notification.read_at === null ?
+                      <Tooltip title="mark as read">
+                        <IconButton onClick={() => handleMarkAsRead(notification.id)}>
+                          <BeenhereOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      // <button className="text-xs text-blue-500 hover:underline" onClick={() => handleMarkAsRead(notification.id)}>
+                      //   Mark as Read
+                      // </button>
+                      : null
+                    }
+                  </li>
+                ))
+              )}
+            </ul>
           </Paper>
         </ClickAwayListener>
       </Popper>

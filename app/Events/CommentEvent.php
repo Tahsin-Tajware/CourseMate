@@ -9,8 +9,9 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\SerializesModels;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use App\Models\Comment;
+use App\Models\User;
 use Carbon\Traits\Serialization;
-
+use Illuminate\Support\Str;
 
 class CommentEvent implements ShouldBroadcast
 {
@@ -47,10 +48,12 @@ class CommentEvent implements ShouldBroadcast
   }
   private function getMessage()
   {
+    $userName = User::where('id', $this->comment->user_id)->value('name');
+    $preview = Str::limit($this->comment->content, 50, '...');
     if ($this->type === 'new') {
-      return "New comment on your post.";
+      return "$userName commented on your post:\n \"$preview\"";
     } elseif ($this->type === 'reply') {
-      return "Someone replied to your comment.";
+      return "$userName replied to your comment:\n \"$preview\" .";
     } elseif ($this->type === 'update') {
       return "A comment you interacted with has been updated.";
     }
