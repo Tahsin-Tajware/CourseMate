@@ -65,7 +65,7 @@ const PostById = () => {
   const fetchComments = useCallback(async () => {
     try {
       const res = await customAxios.get(`/comment/${post_id}`);
-      const fetched = res.data.comments || [];
+      const fetched = res.data.comments.original || [];
       setComments(fetched);
 
       const initialExpanded = {};
@@ -172,11 +172,11 @@ const PostById = () => {
       setPost((prev) =>
         prev
           ? {
-              ...prev,
-              votes_count: netVotes,
-              user_vote: userVote,
-              vote_id: voteId ?? prev.vote_id, // store voteId if returned
-            }
+            ...prev,
+            votes_count: netVotes,
+            user_vote: userVote,
+            vote_id: voteId ?? prev.vote_id, // store voteId if returned
+          }
           : null
       );
     } catch (error) {
@@ -196,11 +196,11 @@ const PostById = () => {
       setPost((prev) =>
         prev
           ? {
-              ...prev,
-              votes_count: netVotes,
-              user_vote: userVote,
-              vote_id: null,
-            }
+            ...prev,
+            votes_count: netVotes,
+            user_vote: userVote,
+            vote_id: null,
+          }
           : null
       );
     } catch (error) {
@@ -573,7 +573,7 @@ const PostById = () => {
           Comments
         </Typography>
         {renderComments(
-          showAllComments ? comments : comments.slice(0, 10) // optional slice
+          showAllComments ? comments : comments?.slice(0, 10) // optional slice
         )}
         {comments.length > 10 && !showAllComments && (
           <Button onClick={() => setShowAllComments(true)} sx={{ mt: 2 }}>

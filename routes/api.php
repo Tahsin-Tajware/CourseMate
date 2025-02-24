@@ -48,8 +48,8 @@ Route::middleware(['auth:api'])->group(function () {
   Route::delete('unsave-post/{post_id}', [SavedPostController::class, 'delete_saved_post']);
   Route::get('saved-post', [SavedPostController::class, 'get_saved_posts']);
 
-  Route::post('/vote', [VoteController::class, 'store']);
-  Route::delete('/vote/{voteId}', [VoteController::class, 'destroy']);
+  Route::post('vote', [VoteController::class, 'store']);
+  Route::delete('vote/{voteId}', [VoteController::class, 'destroy']);
 
   Route::post('comment/{post_id}', [CommentController::class, 'storeComment']);
   Route::delete('comment/{comment_id}', [CommentController::class, 'deleteComment']);
