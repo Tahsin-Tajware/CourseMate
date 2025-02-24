@@ -1,27 +1,24 @@
 import React from "react";
 import { Box, List, ListItem, ListItemIcon, ListItemText, Drawer } from "@mui/material";
-import { Home, QuestionAnswer, BookmarkBorder, Help, Settings, People, StarBorder, Info } from "@mui/icons-material";
+import { Home, People, Notifications, Person, BookmarkBorder, Delete, Info } from "@mui/icons-material";
 import { Link, useLocation } from "react-router-dom";
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
 
   const navItems = [
-    { text: "Home", icon: <Home />, path: "/" },
-    { text: "All Questions", icon: <QuestionAnswer />, path: "/all-questions" },
-    { text: "Course Tags", icon: <BookmarkBorder />, path: "/course-tags" },
-    { text: "Ask Question", icon: <Help />, path: "/ask-question" },
-    { text: "My Posts", icon: <People />, path: "/myposts" },
-    { text: "Discussions", icon: <People />, path: "/discussions" },
-    { text: "Community", icon: <People />, path: "/community" },
-    { text: "Saved Questions", icon: <StarBorder />, path: "/saved-questions" },
-    { text: "Following", icon: <People />, path: "/following" },
-    { text: "Settings", icon: <Settings />, path: "/settings" },
-    { text: "About", icon: <Info />, path: "/about" },
+    { text: "Dashboard", icon: <Home />, path: "/" },
+    { text: "All Users", icon: <People />, path: "/all-users" },
+    { text: "Notifications", icon: <Notifications />, path: "/notifications" },
+    { text: "Profile", icon: <Person />, path: "/profile" },
+    { text: "All Posts", icon: <BookmarkBorder />, path: "/all-posts" },
+    { text: "All Tags", icon: <BookmarkBorder />, path: "/all-tags" },
+    { text: "Deleted Users", icon: <Delete />, path: "/deleted-users" },
+    { text: "Information", icon: <Info />, path: "/information" },
   ];
 
   const handleItemClick = () => {
-    if (isOpen) onClose(); 
+    if (isOpen) onClose();
   };
 
   return (
@@ -30,7 +27,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         <Box
           component="nav"
           width={240}
-          bgcolor="#e5e5e5"
+          bgcolor="#1e1e1e" 
           position="fixed"
           top={72}
           left={0}
@@ -38,8 +35,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           zIndex={1000}
           overflow="auto"
           sx={{
-            borderRight: "1px solid #ddd",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+            borderRight: "1px solid #333",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.5)",
             borderRadius: "0 0 0 0",
           }}
         >
@@ -53,19 +50,19 @@ const Sidebar = ({ isOpen, onClose }) => {
                   component={Link}
                   to={item.path}
                   selected={isSelected}
-                  onClick={handleItemClick} 
+                  onClick={handleItemClick}
                   sx={{
                     py: 1,
                     borderRadius: "8px",
                     mx: 1,
                     transition: "all 0.3s ease",
-                    color: isSelected ? "#111" : "#333",
-                    backgroundColor: isSelected ? "#d9d9d9" : "transparent",
+                    color: isSelected ? "#ff5722" : "#fff", 
+                    backgroundColor: isSelected ? "#333" : "transparent",
                     "&:hover": {
-                      backgroundColor: isSelected ? "#d9d9d9" : "#f0f0f0",
+                      backgroundColor: isSelected ? "#333" : "#444",
                     },
                     "& .MuiListItemIcon-root": {
-                      color: isSelected ? "#111" : "#666",
+                      color: isSelected ? "#ff5722" : "#fff",
                     },
                   }}
                 >
@@ -74,7 +71,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     primary={item.text}
                     sx={{
                       fontWeight: isSelected ? "bold" : "normal",
-                      color: isSelected ? "#111" : "#333",
+                      color: isSelected ? "#ff5722" : "#fff",
                     }}
                   />
                 </ListItem>
@@ -87,7 +84,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       <Box
         component="nav"
         width={240}
-        bgcolor="#fcfcfc"
+        bgcolor="#171617" 
         position="fixed"
         top={72}
         left={0}
@@ -95,8 +92,8 @@ const Sidebar = ({ isOpen, onClose }) => {
         zIndex={1000}
         overflow="auto"
         sx={{
-          borderRight: "1px solid #ddd",
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+          borderRight: "1px solid #333",
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.5)",
           borderRadius: "0 0 0 0",
           display: { xs: 'none', sm: 'block' },
         }}
@@ -111,19 +108,19 @@ const Sidebar = ({ isOpen, onClose }) => {
                 component={Link}
                 to={item.path}
                 selected={isSelected}
-                onClick={handleItemClick} 
+                onClick={handleItemClick}
                 sx={{
                   py: 1,
                   borderRadius: "8px",
                   mx: 1,
                   transition: "all 0.3s ease",
-                  color: isSelected ? "#111" : "#333",
-                  backgroundColor: isSelected ? "#d9d9d9" : "transparent",
+                  color: isSelected ? "#ff5722" : "#fff",
+                  backgroundColor: isSelected ? "#333" : "transparent",
                   "&:hover": {
-                    backgroundColor: isSelected ? "#d9d9d9" : "#f0f0f0",
+                    backgroundColor: isSelected ? "#333" : "#444",
                   },
                   "& .MuiListItemIcon-root": {
-                    color: isSelected ? "#111" : "#666",
+                    color: isSelected ? "#ff5722" : "#fff",
                   },
                 }}
               >
@@ -132,7 +129,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   primary={item.text}
                   sx={{
                     fontWeight: isSelected ? "bold" : "normal",
-                    color: isSelected ? "#111" : "#333",
+                    color: isSelected ? "#ff5722" : "#fff",
                   }}
                 />
               </ListItem>

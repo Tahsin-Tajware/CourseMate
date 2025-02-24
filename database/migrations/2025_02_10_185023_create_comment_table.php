@@ -11,10 +11,12 @@ return new class extends Migration
    */
   public function up(): void
   {
-    Schema::create('post_tag', function (Blueprint $table) {
+    Schema::create('comment', function (Blueprint $table) {
       $table->id();
-      $table->foreignIdFor(\App\Models\Post::class)->constrained()->cascadeOnDelete();
-      $table->foreignIdFor(\App\Models\Tag::class)->constrained()->cascadeOnDelete();
+      $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+      $table->foreignId('post_id')->constrained()->onDelete('cascade');
+      $table->text('content');
+      $table->foreignId('parent_id')->constrained('comment')->onDelete('cascade');;
       $table->timestamps();
     });
   }
@@ -24,7 +26,6 @@ return new class extends Migration
    */
   public function down(): void
   {
-    Schema::dropIfExists('post_tag'); // Drop pivot table first
-    Schema::dropIfExists('posts');
+    Schema::dropIfExists('comment');
   }
 };

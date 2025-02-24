@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { customAxios } from "../api/axiosPrivate";
 import {
   Typography,
   Box,
@@ -22,73 +23,49 @@ import {
   Reply,
   ModeComment,
 } from "@mui/icons-material";
-import axiosPrivate from "../api/axiosPrivate";
-import { customAxios } from "../api/axiosPrivate";
-import { useAuth } from "../context/authContext";
 import { format, parseISO } from "date-fns";
-
-const Home = () => {
-  const [realPosts, setRealPosts] = useState([]);
-  const [showAllPosts, setShowAllPosts] = useState(false);
-  const [auth] = useAuth();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+const PostByTag = () => {
+  const [posts, setPost] = useState([]);
+  const { tag_id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
-
+  const message = location.state?.message;
+  const theme = useTheme();
+  const sortedPosts = posts.sort((a, b) =>
+    new Date(b.created_at || b.time) - new Date(a.created_at || a.time)
+  );
   useEffect(() => {
-    async function fetchPost() {
-      try {
-        if (!auth?.user) {
-          const response = await customAxios.get('/get-all-post');
-          setRealPosts(response.data.posts);
-        } else {
-          const response = await axiosPrivate.get('/get-all-post');
-          setRealPosts(response.data.posts);
-        }
-      } catch (error) {
-        console.error(error);
-      }
+    const fetchPostByTag = async () => {
+      const result = await customAxios.get(`/post_by_tag/${tag_id}`)
+      setPost(result.data.posts);
     }
-    fetchPost();
-  }, [auth]);
-
-  const handleNavigatePostById = (post_id) => {
-    navigate(`/post/${post_id}`);
-  }
-
+    fetchPostByTag();
+  }, [tag_id]);
   const handleGetPostByTag = (tag_id, course_code, course_name) => {
     navigate(`/posts-by-tag/${tag_id}`, { state: { message: `${course_code} - ${course_name}` } });
   }
-
-  // Sort posts by date
-  const sortedPosts = realPosts.sort((a, b) =>
-    new Date(b.created_at || b.time) - new Date(a.created_at || a.time)
-  );
-
   return (
     <Box minHeight="100vh" display="flex" flexDirection="column" width="100%">
       <Container maxWidth={false} sx={{ flex: 1, py: 3, px: { xs: 2, md: 6 } }}>
-        <Box display="flex" flexDirection="column" gap={3} mb={3}>
-          <Typography variant="h4" fontWeight="bold">
-            Welcome to CourseMate!
-          </Typography>
-          <Typography variant="body1">
-            This is the home page where you can explore questions, tags, discussions,
-            and more.
-          </Typography>
+        <Box display="flex" flexDirection="row" mb={3}>
+
+          <div className="text-2xl mr-2">
+            Showing results for
+          </div>
+          <div className="text-2xl font-semibold text-orange-600">
+            {message}
+          </div>
+
         </Box>
 
         <Grid container spacing={3}>
-          {/* Main Section (70%) */}
           <Grid item xs={12} md={8}>
             {sortedPosts.map((post) => (
               <Card
                 key={post.id}
-                sx={{ bgcolor: "background.paper", borderRadius: 2, boxShadow: 3, mb: 3, width: '100%', cursor: "pointer" }}
-                onClick={() => handleNavigatePostById(post.id)}
+                sx={{ bgcolor: "background.paper", borderRadius: 2, boxShadow: 3, mb: 3, width: '100%' }}
               >
                 <CardContent>
-                  {/* Header: User Info with Date on Right */}
                   <Box display="flex" alignItems="center" justifyContent="space-between">
                     <Box display="flex" alignItems="center" gap={1}>
                       <Avatar>{post.username?.charAt(0) || post.user?.name?.charAt(0)}</Avatar>
@@ -121,10 +98,7 @@ const Home = () => {
                           margin: '4px',
                           border: `1px solid ${theme.palette.grey[400]}`,
                         }}
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          handleGetPostByTag(tag.id, tag.course_code, tag.course_name)
-                        }}
+                        onClick={() => handleGetPostByTag(tag.id, tag.course_code, tag.course_name)}
                       />
                     ))}
                     {post.tags?.[0] && (
@@ -161,11 +135,10 @@ const Home = () => {
                     <Grid item display="flex" alignItems="center">
                       <ModeComment fontSize="small" color="action" />
                       <Typography variant="body2" ml={0.5}>
-                        {post.comment_count} Answers
+                        {post.answers} Answers
                       </Typography>
                     </Grid>
 
-                    {/* Reply Button */}
                     <Grid item>
                       <IconButton size="small">
                         <Reply fontSize="small" />
@@ -177,56 +150,11 @@ const Home = () => {
             ))}
           </Grid>
 
-          {/* Sidebar Section (30%) */}
-          <Grid item xs={12} md={4}>
-            <Card sx={{ bgcolor: theme.palette.background.default, borderRadius: 2, boxShadow: 3, p: 2, mb: 3, width: '100%' }}>
-              <Typography variant="h6" fontWeight="bold" mb={2}>
-                Recent Post Tags
-              </Typography>
-              <Stack direction="row" spacing={2} flexWrap="wrap">
-                {sortedPosts.flatMap((post) => post.tags || []).slice(0, 10).map((tag, index) => (
-                  <Chip
-                    key={index}
-                    label={`${tag.course_code} - ${tag.course_name}`}
-                    sx={{
-                      bgcolor: 'transparent',
-                      color: theme.palette.text.primary,
-                      borderRadius: 1,
-                      fontWeight: 'bold',
-                      margin: '8px 4px',
-                      border: `1px solid ${theme.palette.grey[400]}`,
-                    }}
-                  />
-                ))}
-              </Stack>
-            </Card>
 
-            <Card sx={{ bgcolor: theme.palette.background.default, borderRadius: 2, boxShadow: 3, p: 2, width: '100%' }}>
-              <Typography variant="h6" fontWeight="bold" mb={2}>
-                Recent Posts
-              </Typography>
-              <Divider />
-              {sortedPosts.slice(0, showAllPosts ? sortedPosts.length : 10).map((post, index) => (
-                <Box key={post.id} display="flex" justifyContent="space-between" alignItems="center" my={1}>
-                  <Typography variant="body2" sx={{ textAlign: 'left', flex: 1, color: 'blue' }}>
-                    {index + 1}. {post.title || post.content.slice(0, 50) + '...'}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {post.time || format(parseISO(post.created_at), "MMMM d, yyyy h:mm a")}
-                  </Typography>
-                </Box>
-              ))}
-              {!showAllPosts && (
-                <Button onClick={() => setShowAllPosts(true)} sx={{ mt: 2 }}>
-                  See All
-                </Button>
-              )}
-            </Card>
-          </Grid>
+
         </Grid>
       </Container>
     </Box>
-  );
-};
-
-export default Home;
+  )
+}
+export default PostByTag;
