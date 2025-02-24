@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { customAxios } from "../api/axiosPrivate";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import {
   Typography,
   Box,
@@ -27,12 +28,11 @@ import {
   ModeComment,
   Share as ShareIcon,
   MoreVert,
-  Add,
-  Remove,
 } from "@mui/icons-material";
 import { format, parseISO } from "date-fns";
 import axiosPrivate from "../api/axiosPrivate";
 import { useAuth } from "../context/authContext";
+
 const PostById = () => {
   const { post_id } = useParams();
   const [post, setPost] = useState(null);
@@ -50,6 +50,7 @@ const PostById = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [auth] = useAuth();
+
   const fetchComments = async () => {
     try {
       const res = await customAxios.get(`/comment/${post_id}`);
@@ -65,21 +66,20 @@ const PostById = () => {
       console.error("Error fetching comments:", error);
     }
   };
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const res = await customAxios.get(`/post_by_id/${post_id}`);
         setPost(res.data.post);
-
       } catch (error) {
         console.error("Error fetching post:", error);
       }
     };
 
-
     fetchComments();
     fetchPost();
-  }, [post_id,]);
+  }, [post_id]);
 
   const handleAddComment = async (parentId = null) => {
     const commentContent = parentId ? replyContent : newComment;
@@ -94,7 +94,6 @@ const PostById = () => {
         setNewComment("");
         setReplyContent("");
         setReplyingTo(null);
-
       } catch (error) {
         console.error("Error adding comment:", error);
       }
@@ -115,6 +114,7 @@ const PostById = () => {
       console.error("Error deleting comment:", error);
     }
   };
+
   const handleEditComment = async (comment_id) => {
     try {
       await axiosPrivate.put(`/update-comment/${comment_id}`, { content: editContent });
@@ -128,7 +128,8 @@ const PostById = () => {
     } catch (error) {
       console.error("Error updating comment:", error);
     }
-  }
+  };
+
   const handleEditClick = (comment) => {
     setEditingCommentId(comment.id);
     setEditContent(comment.content);
@@ -157,30 +158,30 @@ const PostById = () => {
         key={comment.id}
         sx={{
           borderLeft: `1px solid ${theme.palette.grey[300]}`,
-          borderRadius: '8px 0 0 8px',
+          borderRadius: "8px 0 0 8px",
           pl: 2,
           mb: 2,
-          width: '100%',
-          position: 'relative',
+          width: "100%",
+          position: "relative",
         }}
       >
         <Box display="flex" justifyContent="flex-start" alignItems="center" mb={1}>
           <Box display="flex" alignItems="center" gap={1}>
-            <IconButton
-              size="small"
-              onClick={() => toggleExpand(comment.id)}
-              sx={{
-                backgroundColor: theme.palette.grey[300],
-                borderRadius: '50%',
-                width: 32,
-                height: 32,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {expandedComments[comment.id] ? <Remove fontSize="small" /> : <Add fontSize="small" />}
-            </IconButton>
+            {comment.parent_id && (
+              <IconButton
+                size="small"
+                onClick={() => toggleExpand(comment.id)}
+                sx={{
+                  transition: "transform 0.2s",
+                  transform: expandedComments[comment.id] ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              >
+                <ExpandMore fontSize="small" />
+              </IconButton>
+            )}
+            <Avatar sx={{ bgcolor: theme.palette.grey[500] }}>
+              {comment.user?.name?.charAt(0) || comment.username?.charAt(0)}
+            </Avatar>
             <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
               {comment.user?.name || comment.username}
             </Typography>
@@ -194,7 +195,7 @@ const PostById = () => {
             )}
           </Typography>
         </Box>
-        <Collapse in={expandedComments[comment.id]} timeout="auto" unmountOnExit>
+        <Collapse in={!comment.parent_id || expandedComments[comment.id]} timeout="auto" unmountOnExit>
           {editingCommentId === comment.id ? (
             <Box mt={2} display="flex" alignItems="center" gap={1}>
               <TextField
@@ -213,21 +214,41 @@ const PostById = () => {
               </Button>
             </Box>
           ) : (
-            <Typography variant="body1" color="text.primary" sx={{ wordBreak: 'break-word', textAlign: 'left', marginLeft: 7 }}>
+            <Typography variant="body1" color="text.primary" sx={{ wordBreak: "break-word", textAlign: "left", marginLeft: 7 }}>
               {comment.content}
             </Typography>
           )}
 
-          {/* <Typography variant="body1" color="text.primary" sx={{ wordBreak: 'break-word', textAlign: 'left', marginLeft: 7 }}>
-            {comment.content}
-          </Typography> */}
-          <Box display="flex" alignItems="center" gap={1} mt={1}>
-            <IconButton size="small" color="primary">
+          <Box display="flex" alignItems="center" gap={1} mt={1} ml={6} >
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={() => handleVote("up", comment.id)}
+              sx={{
+                backgroundColor: theme.palette.grey[200],
+                borderRadius: '50%',
+                '&:hover': {
+                  backgroundColor: theme.palette.grey[300],
+                },
+              }}
+            >
               <ArrowUpward fontSize="small" />
             </IconButton>
-            <IconButton size="small" color="secondary">
+            <IconButton
+              size="small"
+              color="secondary"
+              onClick={() => handleVote("down", comment.id)}
+              sx={{
+                backgroundColor: theme.palette.grey[200],
+                borderRadius: '50%',
+                '&:hover': {
+                  backgroundColor: theme.palette.grey[300],
+                },
+              }}
+            >
               <ArrowDownward fontSize="small" />
             </IconButton>
+
             <Button
               size="small"
               color="primary"
@@ -236,11 +257,7 @@ const PostById = () => {
             >
               Reply
             </Button>
-            <Button
-              size="small"
-              color="secondary"
-              startIcon={<ShareIcon fontSize="small" />}
-            >
+            <Button size="small" color="secondary" startIcon={<ShareIcon fontSize="small" />}>
               Share
             </Button>
             <IconButton
@@ -258,21 +275,14 @@ const PostById = () => {
               open={Boolean(anchorEl) && currentCommentId === comment.id}
               onClose={handleMenuClose}
             >
-
-              {
-                comment.user_id === auth?.user?.id ?
-                  <>
-                    <MenuItem onClick={() => handleEditClick(comment)}>Edit</MenuItem>
-                    <MenuItem onClick={() => handleDeleteComment(comment.id)}>Delete</MenuItem>
-                  </>
-                  : null
-              }
-              {
-                comment.user_id !== auth?.user?.id ?
-                  <MenuItem onClick={handleMenuClose}>Report</MenuItem>
-                  : null
-              }
-
+              {comment.user_id === auth?.user?.id ? (
+                <>
+                  <MenuItem onClick={() => handleEditClick(comment)}>Edit</MenuItem>
+                  <MenuItem onClick={() => handleDeleteComment(comment.id)}>Delete</MenuItem>
+                </>
+              ) : (
+                <MenuItem onClick={handleMenuClose}>Report</MenuItem>
+              )}
             </Menu>
           </Box>
           {replyingTo === comment.id && (
@@ -306,7 +316,7 @@ const PostById = () => {
 
   return (
     <Container maxWidth={false} sx={{ mt: 4, px: { xs: 2, md: 6 } }}>
-      <Card sx={{ bgcolor: "background.paper", borderRadius: 2, boxShadow: 3, mb: 3, p: 3, width: '100%' }}>
+      <Card sx={{ bgcolor: "background.paper", borderRadius: 2, boxShadow: 3, mb: 3, p: 3, width: "100%" }}>
         <CardContent>
           <Box display="flex" alignItems="center" justifyContent="space-between">
             <Box display="flex" alignItems="center" gap={1}>
@@ -399,15 +409,19 @@ const PostById = () => {
           onChange={(e) => setNewComment(e.target.value)}
           sx={{ mb: 2 }}
         />
-        <Button variant="contained" color="primary" onClick={(e) => {
-          e.preventDefault();
-          handleAddComment();
-        }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={(e) => {
+            e.preventDefault();
+            handleAddComment();
+          }}
+        >
           Add Comment
         </Button>
       </Box>
 
-      <Card sx={{ bgcolor: "background.paper", borderRadius: 2, boxShadow: 3, p: 3, width: '100%' }}>
+      <Card sx={{ bgcolor: "background.paper", borderRadius: 2, boxShadow: 3, p: 3, width: "100%" }}>
         <Typography variant="h6" fontWeight="bold" mb={2}>
           Comments
         </Typography>
