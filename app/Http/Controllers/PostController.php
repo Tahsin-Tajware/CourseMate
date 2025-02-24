@@ -46,13 +46,28 @@ class PostController extends Controller
   }
   public function getPostById($post_id)
   {
-    $post = Post::with('tags', 'user')->where('id', $post_id)->first();
+    $post = Post::with('tags', 'user', 'votes')->where('id', $post_id)->first();
 
-    if ($post) {
-      return response()->json(['message' => 'Post fetched successfully', 'post' => $post], 200);
-    } else {
+    if (!$post) {
       return response()->json(['message' => 'Post not found'], 404);
     }
+
+    // Net votes
+    $post->votes_count = $post->votes->sum('value');
+
+    // Current user’s vote
+    $post->user_vote = 0;
+    if (auth('api')->check()) {
+        $existingVote = $post->votes
+            ->where('user_id', auth('api')->id())
+            ->first();
+        $post->user_vote = $existingVote ? $existingVote->value : 0;
+    }
+
+    return response()->json([
+        'message' => 'Post fetched successfully',
+        'post'    => $post
+    ], 200);
   }
   public function updatePost($id, CreatePostRequest $request)
   {

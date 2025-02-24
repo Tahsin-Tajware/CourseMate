@@ -23,9 +23,45 @@ class CommentService
   {
     return Comment::where('post_id', $post_id)
       ->whereNull('parent_id')
-      ->with(['replies', 'user'])
-      ->orderBy('created_at', 'desc')
-      ->get();
+      ->with(['replies.user',
+            'replies.votes', // load votes on replies
+            'user',
+            'votes'          // load votes on top-level comments
+        ])
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    // Process top-level comments
+    foreach ($comments as $comment) {
+        $this->appendVoteDataToComment($comment);
+    }
+
+    return $comments;
+}
+
+/**
+ * Recursively append votes_count and user_vote to a comment and its replies.
+ */
+private function appendVoteDataToComment(Comment $comment)
+{
+    // 1) Net votes
+    $comment->votes_count = $comment->votes->sum('value');
+
+    // 2) Current user’s vote
+    $comment->user_vote = 0;
+    if (auth('api')->check()) {
+        $existingVote = $comment->votes
+            ->where('user_id', auth('api')->id())
+            ->first();
+        $comment->user_vote = $existingVote ? $existingVote->value : 0;
+    }
+
+    // Process nested replies
+    if ($comment->replies && $comment->replies->count() > 0) {
+        foreach ($comment->replies as $reply) {
+            $this->appendVoteDataToComment($reply);
+        }
+    }
   }
 
   public function analyzeComment($text)
