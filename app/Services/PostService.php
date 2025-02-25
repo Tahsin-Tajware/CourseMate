@@ -45,7 +45,21 @@ class PostService
     //   $posts = Post::all();
     //   return response()->json(['message' => 'Posts fetched successfully', 'posts' => $posts], 200);
     // }
-    $posts = Post::with(['user', 'tags'])->withCount('comment')->get();
+    $posts = Post::with(['user', 'tags', 'votes'])->withCount('comment')->get();
+    foreach ($posts as $post) {
+      // 1) Net votes
+      $post->votes_count = $post->votes->sum('value');
+
+      // 2) Current user’s vote
+      //    If not logged in, user_vote = 0
+      $post->user_vote = 0;
+      if (auth('api')->check()) {
+          $existingVote = $post->votes
+              ->where('user_id', auth('api')->id())
+              ->first();
+          $post->user_vote = $existingVote ? $existingVote->value : 0;
+      }
+  }
     return $posts;
   }
   public function updatePost(array $validatedData, $post_id)

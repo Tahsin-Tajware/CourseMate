@@ -25,4 +25,9 @@ class Post extends Model
   {
     return $this->hasMany(Comment::class);
   }
+  public function votes()
+  {
+    return $this->morphMany(Vote::class, 'votable');
+  }
+
 }
