@@ -7,6 +7,10 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SavedPostController;
+use App\Http\Controllers\VoteController;
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth:sanctum');
 
 Route::group(
   ['prefix' => 'auth'],
@@ -52,6 +56,9 @@ Route::middleware(['auth:api'])->group(function () {
   Route::get('saved-post', [SavedPostController::class, 'get_saved_posts']);
 
   //comment-related
+  Route::post('vote', [VoteController::class, 'store']);
+  Route::delete('vote/{voteId}', [VoteController::class, 'destroy']);
+
   Route::post('comment/{post_id}', [CommentController::class, 'storeComment']);
   Route::delete('comment/{comment_id}', [CommentController::class, 'deleteComment']);
   Route::put('update-comment/{comment_id}', [CommentController::class, 'updateComment']);
