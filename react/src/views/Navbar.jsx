@@ -21,6 +21,9 @@ import { useAuth } from "../context/authContext";
 import axiosPrivate from "../api/axiosPrivate";
 import { Edit as EditIcon, Delete as DeleteIcon, MoreVert as MoreVertIcon } from "@mui/icons-material";
 import BeenhereOutlinedIcon from '@mui/icons-material/BeenhereOutlined';
+import { format } from "date-fns";
+import CircleIcon from '@mui/icons-material/Circle';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 const Navbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -128,6 +131,13 @@ const Navbar = ({ onToggleSidebar }) => {
       console.log(error)
     }
   }
+  const groupedNotifications = notifications.reduce((acc, notification) => {
+    const dateKey = format(new Date(notification.created_at), "MMMM dd, yyyy"); // Format date
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(notification);
+    return acc;
+  }, {});
+
   return (
     <Box
       component="nav"
@@ -298,7 +308,13 @@ const Navbar = ({ onToggleSidebar }) => {
           sx={{ color: "#555", "&:hover": { color: "#FF6D00" }, ...(notificationOpen && { color: "#FF6D00" }) }}
         >
           <Badge badgeContent={count_unread} color="error">
-            <Notifications fontSize="medium" />
+            {
+              !notificationOpen ?
+                <NotificationsNoneOutlinedIcon fontSize="medium" />
+                :
+                <Notifications fontSize="medium" />
+            }
+
           </Badge>
 
         </IconButton>
@@ -336,6 +352,7 @@ const Navbar = ({ onToggleSidebar }) => {
               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
               borderRadius: "8px",
               backgroundColor: "#fff",
+              padding: '5px',
             }}
           >
             <div className="p-4 border-b flex justify-between items-center">
@@ -353,7 +370,7 @@ const Navbar = ({ onToggleSidebar }) => {
                 PaperProps={{
                   style: {
                     maxHeight: 200,
-                    width: "200px",
+                    width: "160px",
                     //backgroundColor: ''
                   },
                 }}
@@ -375,27 +392,49 @@ const Navbar = ({ onToggleSidebar }) => {
               {notifications.length === 0 ? (
                 <li className="text-gray-500 text-sm p-3">No new notifications</li>
               ) : (
-                notifications.map((notification) => (
-                  <li
-                    key={notification.id}
-                    className={`p-3 border-b cursor-pointer flex justify-between items-center transition duration-200 ${notification.read_at === null ? "bg-gray-100" : "bg-white hover:bg-gray-200"
-                      }`}
-                    onClick={() => handleNavigatePostById(notification.data.post_id, notification.id)} //navigate(`post/${notification.data.post_id}`)
+                Object.entries(groupedNotifications).map(([date, notiList]) => (
+                  <div key={date}>
+                    <h3 className="px-4 py-2 bg-gray-200 text-gray-700 font-semibold">
+                      {date}
+                    </h3>
+                    {notiList.map((notification) => (
+                      <li
+                        key={notification.id}
+                        className={`p-3  cursor-pointer flex text-start justify-stretch items-center transition duration-200 
+              group ${"bg-white hover:bg-gray-200 hover:rounded-xl"}`}
+                        onClick={() => handleNavigatePostById(notification.data.post_id, notification.id)}
+                      >
+                        <span className="text-sm text-gray-700">{notification.data.message}</span>
+                        {notification.read_at === null && (
+                          <div className="relative flex items-center">
 
-                  >
-                    <span className="text-sm text-gray-700">{notification.data.message}</span>
-                    {notification.read_at === null ?
-                      <Tooltip title="mark as read">
-                        <IconButton onClick={() => handleMarkAsRead(notification.id)}>
-                          <BeenhereOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      // <button className="text-xs text-blue-500 hover:underline" onClick={() => handleMarkAsRead(notification.id)}>
-                      //   Mark as Read
-                      // </button>
-                      : null
-                    }
-                  </li>
+                            <CircleIcon
+                              fontSize="15px"
+                              sx={{ color: "#b2c2ff" }}
+                              className="absolute text-end transition-opacity duration-200 group-hover:opacity-0"
+                            />
+
+                            <Tooltip title="Mark as read">
+                              <IconButton
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMarkAsRead(notification.id);
+                                }}
+                                className="transition-opacity duration-200 opacity-0 group-hover:opacity-100"
+                              >
+                                <BeenhereOutlinedIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </div>
+
+
+                        )
+
+
+                        }
+                      </li>
+                    ))}
+                  </div>
                 ))
               )}
             </ul>
