@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Events\PostWithSimilarTagNotificationEvent;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Notifications\PostWithSimilarTagNotification;
+use App\Models\User;
 
 class PostService
 {
@@ -27,6 +30,27 @@ class PostService
         $tagIds[] = $tag->id;
       }
       $post->tags()->attach($tagIds);
+
+      $usersToNotify = User::whereHas('post', function ($query) use ($tagIds) {
+        $query->whereHas('tags', function ($tagQuery) use ($tagIds) {
+          $tagQuery->whereIn('tags.id', $tagIds);
+        });
+      })->where('id', '!=', auth('api')->user()->id)->get(); // Exclude the post creator
+      error_log($usersToNotify);
+      foreach ($usersToNotify as $user) {
+
+        $matchedTags = $user->post()
+          ->whereHas('tags', function ($query) use ($tagIds) {
+            $query->whereIn('tags.id', $tagIds);
+          })
+          ->with('tags') //->pluck('tags')->flatten()->unique('id')
+          ->first();
+        // error_log($matchedTags);
+        $res_tag = $matchedTags->tags[0]->course_code . ' ' . $matchedTags->tags[0]->course_name;
+        error_log($res_tag);
+        $user->notify(new PostWithSimilarTagNotification($post, $res_tag));
+        broadcast(new PostWithSimilarTagNotificationEvent($post, $res_tag, $user->id));
+      }
     }
 
     return $post->load('tags');
@@ -54,12 +78,12 @@ class PostService
       //    If not logged in, user_vote = 0
       $post->user_vote = 0;
       if (auth('api')->check()) {
-          $existingVote = $post->votes
-              ->where('user_id', auth('api')->id())
-              ->first();
-          $post->user_vote = $existingVote ? $existingVote->value : 0;
+        $existingVote = $post->votes
+          ->where('user_id', auth('api')->id())
+          ->first();
+        $post->user_vote = $existingVote ? $existingVote->value : 0;
       }
-  }
+    }
     return $posts;
   }
   public function updatePost(array $validatedData, $post_id)
