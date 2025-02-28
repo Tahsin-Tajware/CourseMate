@@ -12,33 +12,36 @@ const Notifications = () => {
   const [auth] = useAuth();
   const user = JSON.parse(localStorage.getItem('user'));
   useEffect(() => {
-    fetchNotifications();
+    if (user) {
+      fetchNotifications();
 
-    const channel = echo.private(`App.Models.User.${user.id}`);
+      const channel = echo.private(`App.Models.User.${user.id}`);
 
-    channel.listen('.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated', (e) => {
-      console.log("Raw Notification Event:", e);
+      channel.listen('.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated', (e) => {
+        console.log("Raw Notification Event:", e);
 
-      // Parse the event data (it's a stringified JSON)
-      //const eventData = JSON.parse(e.data);
+        // Parse the event data (it's a stringified JSON)
+        //const eventData = JSON.parse(e.data);
 
-      // Display the toast notification
-      toast.message(e.message, {
-        //description: `Post ID: ${e.post_id}, Comment ID: ${e.comment_id}`,
-        duration: 5000,
-        icon: <NotificationsActiveOutlinedIcon />,
-        action: {
-          label: 'go to post',
-          onClick: () => (window.location.href = `/post/${e.post_id}`)
-        }
+        // Display the toast notification
+        toast.message(e.message, {
+          //description: `Post ID: ${e.post_id}, Comment ID: ${e.comment_id}`,
+          duration: 5000,
+          icon: <NotificationsActiveOutlinedIcon />,
+          action: {
+            label: 'go to post',
+            onClick: () => (window.location.href = `/post/${e.post_id}`)
+          }
+        });
       });
-    });
 
-    // Cleanup: Remove event listener when component unmounts
-    return () => {
-      channel.stopListening('.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated');
-      echo.leave(`App.Models.User.${user.id}`);
-    };
+
+      // Cleanup: Remove event listener when component unmounts
+      return () => {
+        channel.stopListening('.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated');
+        echo.leave(`App.Models.User.${user.id}`);
+      };
+    }
   }, []); // Only run when `user` changes
 
 

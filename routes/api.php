@@ -7,6 +7,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SavedPostController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\VoteController;
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -34,6 +35,7 @@ Route::get('get-all-post', [PostController::class, 'getAllPost']);
 Route::get('comment/{post_id}', [CommentController::class, 'getAllComments']);
 Route::get('post_by_id/{post_id}', [PostController::class, 'getPostById']);
 Route::get('post_by_tag/{tag_id}', [PostController::class, 'getPostsByTag']);
+Route::get('search', [SearchController::class, 'search']);
 //protected routes
 
 Broadcast::routes(['middleware' => ['auth:api']]);
