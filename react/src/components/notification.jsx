@@ -12,6 +12,9 @@ const Notifications = () => {
   const [auth] = useAuth();
   const user = JSON.parse(localStorage.getItem('user'));
   useEffect(() => {
+    if(user){
+
+    
     fetchNotifications();
 
     const channel = echo.private(`App.Models.User.${user.id}`);
@@ -39,6 +42,7 @@ const Notifications = () => {
       channel.stopListening('.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated');
       echo.leave(`App.Models.User.${user.id}`);
     };
+  }
   }, []); // Only run when `user` changes
 
 
