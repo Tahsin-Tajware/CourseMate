@@ -24,8 +24,8 @@ class CommentEvent implements ShouldBroadcast
   public function __construct(Comment $comment, $type, $receiverId)
   {
     $this->comment = $comment;
-    $this->type = $type; // 'new', 'reply', or 'update'
-    $this->receiverId = $receiverId; // ID of the user who should receive the notification
+    $this->type = $type;
+    $this->receiverId = $receiverId;
   }
 
   public function broadcastOn()
