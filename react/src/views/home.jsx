@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"; 
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Typography,
@@ -15,8 +15,10 @@ import {
   Button,
   useTheme,
   useMediaQuery,
+  Menu,
+  MenuItem,
 } from "@mui/material";
-import { ArrowUpward, ArrowDownward, Reply, ModeComment } from "@mui/icons-material";
+import { ArrowUpward, ArrowDownward, Reply, ModeComment, MoreVert } from "@mui/icons-material";
 import axiosPrivate, { customAxios } from "../api/axiosPrivate";
 import { useAuth } from "../context/authContext";
 import { format, parseISO } from "date-fns";
@@ -28,6 +30,8 @@ const Home = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedPostId, setSelectedPostId] = useState(null);
 
   useEffect(() => {
     async function fetchPosts() {
@@ -36,8 +40,6 @@ const Home = () => {
           ? await axiosPrivate.get("/get-all-post")
           : await customAxios.get("/get-all-post");
 
-        // Each post is expected to have:
-        //   post.votes_count, post.user_vote, and post.vote_id (if already voted)
         setPosts(response.data.posts);
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -46,14 +48,13 @@ const Home = () => {
     fetchPosts();
   }, [auth]);
 
-  // Upvote or downvote a post
   const handleVote = async (postId, value, e) => {
     e.stopPropagation();
     try {
       const res = await axiosPrivate.post("/vote", {
         votable_type: "post",
         votable_id: postId,
-        value, // 1 for upvote, -1 for downvote
+        value,
       });
       const { netVotes, userVote, voteId } = res.data;
       setPosts((prevPosts) =>
@@ -68,10 +69,9 @@ const Home = () => {
     }
   };
 
-  // Remove a vote on a post
   const handleRemoveVote = async (postId, voteId, e) => {
     e.stopPropagation();
-    if (!voteId) return; // no vote exists
+    if (!voteId) return;
     try {
       const res = await axiosPrivate.delete(`/vote/${voteId}`);
       const { netVotes, userVote } = res.data;
@@ -95,6 +95,27 @@ const Home = () => {
     navigate(`/posts-by-tag/${tag_id}`, {
       state: { message: `${course_code} - ${course_name}` },
     });
+  };
+
+  const handleMenuClick = (event, postId) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setSelectedPostId(postId);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedPostId(null);
+  };
+
+  const handleSavePost = async () => {
+    if (!selectedPostId) return;
+    try {
+      await axiosPrivate.post(`/save-post/${selectedPostId}`);
+      handleMenuClose();
+    } catch (error) {
+      console.error("Error saving post:", error);
+    }
   };
 
   const sortedPosts = [...posts].sort(
@@ -127,11 +148,14 @@ const Home = () => {
                   mb: 3,
                   width: "100%",
                   cursor: "pointer",
+                  "&:hover .post-actions": {
+                    visibility: "visible",
+                  },
                 }}
                 onClick={() => handleNavigatePostById(post.id)}
               >
                 <CardContent>
-                  {/* Header */}
+                 
                   <Box display="flex" alignItems="center" justifyContent="space-between">
                     <Box display="flex" alignItems="center" gap={1}>
                       <Avatar>{post.username?.charAt(0) || post.user?.name?.charAt(0)}</Avatar>
@@ -139,12 +163,22 @@ const Home = () => {
                         {post.username || post.user?.name}
                       </Typography>
                     </Box>
-                    <Typography variant="caption" color="text.secondary">
-                      {post.time || format(parseISO(post.created_at), "MMMM d, yyyy h:mm a")}
-                    </Typography>
+                    <Box display="flex" alignItems="center">
+                      <Typography variant="caption" color="text.secondary">
+                        {post.time || format(parseISO(post.created_at), "MMMM d, yyyy h:mm a")}
+                      </Typography>
+                      <IconButton
+                        className="post-actions"
+                        size="small"
+                        sx={{ visibility: "hidden", ml: 1 }}
+                        onClick={(e) => handleMenuClick(e, post.id)}
+                      >
+                        <MoreVert fontSize="small" />
+                      </IconButton>
+                    </Box>
                   </Box>
 
-                  {/* Title & Content */}
+                  
                   <Typography variant="h6" fontWeight="bold" gutterBottom>
                     {post.title}
                   </Typography>
@@ -221,7 +255,7 @@ const Home = () => {
                     <Grid item display="flex" alignItems="center">
                       <ModeComment fontSize="small" color="action" />
                       <Typography variant="body2" ml={0.5}>
-                        {post.comments?.length || 0} Answers
+                        {post.comment_count || 0} Answers
                       </Typography>
                     </Grid>
                   </Grid>
@@ -265,6 +299,14 @@ const Home = () => {
           </Grid>
         </Grid>
       </Container>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleSavePost}>Save Post</MenuItem>
+      </Menu>
     </Box>
   );
 };

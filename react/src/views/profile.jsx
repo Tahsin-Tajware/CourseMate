@@ -139,6 +139,9 @@ const Profile = () => {
     if (newValue === 1) {
       navigate('/myposts');
     }
+    if (newValue === 3) {
+      navigate('/saved-post');
+    }
   };
 
   return (

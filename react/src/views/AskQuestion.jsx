@@ -184,7 +184,7 @@ const AskQuestion = () => {
     } else {
       toast.error(`Invalid file type for ${type}. Please upload a valid file.`);
     }
-    setHasAttachments(true); 
+    setHasAttachments(true);
   };
 
   const handleMenuOpen = (event) => {
@@ -208,6 +208,9 @@ const AskQuestion = () => {
   const handleRemoveImage = (index) => {
     const updatedImages = question.images.filter((_, i) => i !== index);
     setQuestion({ ...question, images: updatedImages });
+    if (updatedImages.length === 0) {
+      setHasAttachments(false);
+    }
   };
 
   const handleRemovePdf = () => {
@@ -242,71 +245,71 @@ const AskQuestion = () => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: "bold", textAlign: "left" }}>
-                      What are the details of your problem?
-                    </Typography>
-                    <Box sx={{ position: 'relative' }}>
-                      <TextField
-                        fullWidth
-                        placeholder="Introduce the problem and expand on what you put in the title. Minimum 20 characters."
-                        name="content"
-                        value={question.content}
-                        onChange={handleChange}
-                        margin="normal"
-                        multiline
-                        rows={4}
-                        required
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <Tooltip title='Add Attachment'>
-                                <IconButton onClick={handleMenuOpen}>
-                                  <AttachFileIcon />
-                                </IconButton>
-                              </Tooltip>
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                      {hasAttachments && (
-                        <Typography variant="subtitle1" sx={{ fontWeight: "bold", textAlign: "left" }}>
-                          Attachments
-                        </Typography>
-                      )}
-                      {question.images.length > 0 && (
-                        <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                          {question.images.map((image, index) => (
-                            <Box key={index} sx={{ position: 'relative' }}>
-                              <img
-                                src={URL.createObjectURL(image)}
-                                alt={`Selected ${index}`}
-                                style={{ maxHeight: '50px', cursor: 'pointer' }}
-                                onClick={() => handleImageClick(index)}
-                              />
-                              <IconButton
-                                size="small"
-                                sx={{ position: 'absolute', top: -10, right: -10, backgroundColor: 'white' }}
-                                onClick={() => handleRemoveImage(index)}
-                              >
-                                <RemoveCircleIcon sx={{ fontSize: "20px", color: "red" }} />
+                  <Typography variant="subtitle1" sx={{ fontWeight: "bold", textAlign: "left" }}>
+                    What are the details of your problem?
+                  </Typography>
+                  <Box sx={{ position: 'relative' }}>
+                    <TextField
+                      fullWidth
+                      placeholder="Introduce the problem and expand on what you put in the title. Minimum 20 characters."
+                      name="content"
+                      value={question.content}
+                      onChange={handleChange}
+                      margin="normal"
+                      multiline
+                      rows={4}
+                      required
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Tooltip title='Add Attachment'>
+                              <IconButton onClick={handleMenuOpen}>
+                                <AttachFileIcon />
                               </IconButton>
-                            </Box>
-                          ))}
-                        </Box>
-                      )}
-                      {question.pdf && (
-                        <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <PictureAsPdfIcon color="secondary" />
-                          <Typography variant="body2">
-                            {question.pdf.name}
-                          </Typography>
-                          <IconButton size="small" onClick={handleRemovePdf}>
-                            <RemoveCircleIcon sx={{ fontSize: "20px", color: "red" }} />
-                          </IconButton>
-                        </Box>
-                      )}
-                    </Box>
-                  </Grid>
+                            </Tooltip>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    {hasAttachments && (
+                      <Typography variant="subtitle1" sx={{ fontWeight: "bold", textAlign: "left" }}>
+                        Attachments
+                      </Typography>
+                    )}
+                    {question.images.length > 0 && (
+                      <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {question.images.map((image, index) => (
+                          <Box key={index} sx={{ position: 'relative' }}>
+                            <img
+                              src={URL.createObjectURL(image)}
+                              alt={`Selected ${index}`}
+                              style={{ maxHeight: '50px', cursor: 'pointer' }}
+                              onClick={() => handleImageClick(index)}
+                            />
+                            <IconButton
+                              size="small"
+                              sx={{ position: 'absolute', top: -10, right: -10, backgroundColor: 'white' }}
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              <RemoveCircleIcon sx={{ fontSize: "20px", color: "red" }} />
+                            </IconButton>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                    {question.pdf && (
+                      <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <PictureAsPdfIcon color="secondary" />
+                        <Typography variant="body2">
+                          {question.pdf.name}
+                        </Typography>
+                        <IconButton size="small" onClick={handleRemovePdf}>
+                          <RemoveCircleIcon sx={{ fontSize: "20px", color: "red" }} />
+                        </IconButton>
+                      </Box>
+                    )}
+                  </Box>
+                </Grid>
 
                 <Grid item xs={12}>
                   <Typography variant="subtitle1" sx={{ fontWeight: "bold", textAlign: "left" }}>

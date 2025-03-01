@@ -13,6 +13,7 @@ import PostPage from "./views/PostPage";
 import UpdatePost from "./views/updatePost.jsx";
 import PostByTag from "./views/postByTag.jsx";
 import PostById from "./views/postById.jsx";
+import SavedPost from "./views/savedPost.jsx";
 const router = createBrowserRouter([
   {
     element: <Layout />,
@@ -33,7 +34,7 @@ const router = createBrowserRouter([
           { path: "/ask-question", element: <AskQuestion /> },
           { path: "/myposts", element: <PostPage /> },
           { path: "/edit-post/:postId", element: <UpdatePost /> },
-
+          { path: "/saved-post", element: <SavedPost /> },
 
 
         ],
