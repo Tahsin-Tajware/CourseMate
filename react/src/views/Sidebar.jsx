@@ -11,6 +11,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { text: "All Questions", icon: <QuestionAnswer />, path: "/all-questions" },
     { text: "Course Tags", icon: <BookmarkBorder />, path: "/course-tags" },
     { text: "Ask Question", icon: <Help />, path: "/ask-question" },
+    { text: "My Posts", icon: <People />, path: "/myposts" },
     { text: "Discussions", icon: <People />, path: "/discussions" },
     { text: "Community", icon: <People />, path: "/community" },
     { text: "Saved Questions", icon: <StarBorder />, path: "/saved-questions" },

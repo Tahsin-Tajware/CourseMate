@@ -38,4 +38,57 @@ class PostController extends Controller
     $posts = $this->postService->getAllPosts();
     return response()->json(['message' => 'Posts fetched successfully', 'posts' => $posts], 200);
   }
+  public function getMyPost()
+  {
+    $user = auth('api')->user();
+    $post = $user->post()->with('tags')->get();
+    return response()->json(['message' => 'Post fetched successfully', 'post' => $post], 200);
+  }
+  public function getPostById($post_id)
+  {
+    $post = Post::with('tags', 'user', 'votes')->where('id', $post_id)->first();
+
+    if (!$post) {
+      return response()->json(['message' => 'Post not found'], 404);
+    }
+
+    // Net votes
+    $post->votes_count = $post->votes->sum('value');
+
+    // Current user’s vote
+    $post->user_vote = 0;
+    if (auth('api')->check()) {
+        $existingVote = $post->votes
+            ->where('user_id', auth('api')->id())
+            ->first();
+        $post->user_vote = $existingVote ? $existingVote->value : 0;
+    }
+
+    return response()->json([
+        'message' => 'Post fetched successfully',
+        'post'    => $post
+    ], 200);
+  }
+  public function updatePost($id, CreatePostRequest $request)
+  {
+    $validatedData = $request->validated();
+    $data = $this->postService->updatePost($validatedData, $id);
+    if (isset($data['error'])) {
+      return response()->json(['message' => $data['error']]);
+    }
+    return response()->json(['message' => 'Post updated successfully', 'post' => $data], 200);
+  }
+  public function deletePost($post_id)
+  {
+    $data = $this->postService->deletePost($post_id);
+    if (isset($data['error'])) {
+      return response()->json(['message' => $data['error']], 404);
+    }
+    return response()->json(['message' => 'Post deleted successfully'], 200);
+  }
+  public function getPostsByTag($tag_id)
+  {
+    $posts = Tag::find($tag_id)->posts()->with('tags', 'user')->get();
+    return response()->json(['message' => 'Posts fetched successfully', 'posts' => $posts], 200);
+  }
 }
