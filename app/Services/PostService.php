@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Events\PostWithSimilarTagNotificationEvent;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\PostWithSimilarTagNotification;
+use App\Models\User;
 
 class PostService
 {
@@ -27,6 +30,7 @@ class PostService
     if (!empty($validatedData['tags'])) {
       $tagIds = [];
       foreach ($validatedData['tags'] as $tagData) {
+
 
         $existingTag = DB::select("
                 SELECT id FROM tags WHERE course_code = ? AND course_name = ? AND varsity = ?
@@ -186,6 +190,7 @@ GROUP BY
     if ($user_id != $post->user_id) {
       return ['error' => 'invalid request'];
     }
+
     $post->delete();
     return ['message' => 'post deleted successfully'];
   }
