@@ -29,5 +29,8 @@ class Comment extends Model
   {
     return $this->morphMany(Vote::class, 'votable');
   }
-
+  public function reports()
+  {
+    return $this->hasMany(Report::class);
+  }
 }
