@@ -47,29 +47,44 @@ class PostController extends Controller
   }
   public function getPostById($post_id)
   {
-    $post = Post::with('tags', 'user', 'votes')->where('id', $post_id)->first();
+    $user_id = auth('api')->id();
+
+    $post = DB::select("
+        SELECT 
+            posts.*,
+            users.id AS user_id,
+            users.name AS user_name,
+            users.email AS user_email,
+            (SELECT SUM(value) FROM votes WHERE votes.post_id = posts.id) AS votes_count,
+            (SELECT value FROM votes WHERE votes.post_id = posts.id AND votes.user_id = ?) AS user_vote,
+            (
+                SELECT JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'id', tags.id,
+                        'course_name', tags.course_name,
+                        'course_code', tags.course_code,
+                        'varsity', tags.varsity
+                    )
+                ) 
+                FROM tags 
+                JOIN post_tag ON tags.id = post_tag.tag_id 
+                WHERE post_tag.post_id = posts.id
+            ) AS tags
+        FROM posts
+        JOIN users ON posts.user_id = users.id
+        WHERE posts.id = ?
+    ", [$user_id, $post_id]);
 
     if (!$post) {
       return response()->json(['message' => 'Post not found'], 404);
     }
 
-    // Net votes
-    $post->votes_count = $post->votes->sum('value');
-
-    // Current user’s vote
-    $post->user_vote = 0;
-    if (auth('api')->check()) {
-      $existingVote = $post->votes
-        ->where('user_id', auth('api')->id())
-        ->first();
-      $post->user_vote = $existingVote ? $existingVote->value : 0;
-    }
-
     return response()->json([
       'message' => 'Post fetched successfully',
-      'post'    => $post
+      'post'    => $post[0] // Because DB::select() returns an array
     ], 200);
   }
+
   public function updatePost($id, CreatePostRequest $request)
   {
     $validatedData = $request->validated();
@@ -104,11 +119,14 @@ class PostController extends Controller
   {
     $query = Post::query()->with(['tags', 'user'])->withCount(['votes', 'comment']);
     if ($request->has('query') && !empty($request->query('query'))) {
-      $query->where(function ($q) use ($request) {
-        $q->where('title', 'LIKE', '%' . $request->query('query') . '%')
-          ->orWhere('content', 'LIKE', '%' . $request->query('query') . '%');
-      });
+
+      $searchTerm = '%' . $request->query('query') . '%';
+      $posts = DB::select("
+          SELECT * FROM posts
+          WHERE title LIKE ? OR content LIKE ?
+      ", [$searchTerm, $searchTerm]);
     }
+
     if ($request->has('tag') && !empty($request->tag)) {
       $query->whereHas('tags', function ($q) use ($request) {
         $q->where('course_code', $request->tag);
