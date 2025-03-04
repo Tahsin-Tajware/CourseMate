@@ -8,25 +8,27 @@ import {
   Button,
   CircularProgress,
   Typography,
-  Chip, Card, CardContent, Avatar, Stack,
+  Chip,
+  Card,
+  CardContent,
+  Avatar,
+  Stack,
   List,
-
   Grid,
-
   Container,
   Divider,
-
   useTheme,
-  useMediaQuery,
-
   IconButton,
   Menu,
-  MenuItem
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel
 } from "@mui/material";
 import { format, parseISO } from "date-fns";
 import { ArrowUpward, ArrowDownward, Reply, ModeComment, MoreVert } from "@mui/icons-material";
+
 const SearchResults = () => {
-  //const query = new URLSearchParams(location.search).get("query");
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -35,12 +37,14 @@ const SearchResults = () => {
   const [highlightPostId, setHighlightPostId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentPostId, setCurrentPostId] = useState(null);
+  const [sortBy, setSortBy] = useState("created_at"); // Default sort by creation date
   const navigate = useNavigate();
   const { query } = useParams();
   const theme = useTheme();
+
   const fetchUserPosts = async () => {
     try {
-      const response = await customAxios.get(`/posts/search?query=${query}`)
+      const response = await customAxios.get(`/posts/search?query=${query}&sort_by=${sortBy}`);
       console.log("Fetched posts:", response.data);
       if (response.data.data && response.data.data) {
         setUserPosts(response.data.data);
@@ -54,9 +58,10 @@ const SearchResults = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchUserPosts();
-  }, [query]);
+  }, [query, sortBy]);
 
   useEffect(() => {
     if (highlightPostId) {
@@ -68,10 +73,9 @@ const SearchResults = () => {
     }
   }, [highlightPostId]);
 
-
-
-
-
+  const handleSortChange = (event) => {
+    setSortBy(event.target.value);
+  };
 
   return (
     <Box sx={{ backgroundColor: '#f9f9f9', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -79,60 +83,27 @@ const SearchResults = () => {
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: '#333' }}>
         Search results for {query}
       </Typography>
+
+      {/* Sort Dropdown */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mb: 2, px: 2 }}>
+        <FormControl fullWidth sx={{ maxWidth: 300 }}>
+          <InputLabel id="sort-label">Sort By</InputLabel>
+          <Select
+            labelId="sort-label"
+            id="sort-select"
+            value={sortBy}
+            label="Sort By"
+            onChange={handleSortChange}
+          >
+            <MenuItem value="created_at">Creation Date</MenuItem>
+            <MenuItem value="votes_count">Votes</MenuItem>
+            <MenuItem value="comment_count">Comments</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
       {userPosts.length > 0 ? (
         <List sx={{ width: '100%', bgcolor: 'background.paper', maxWidth: '650px', }}>
-          {/* {userPosts.map((post, index) => (
-            <React.Fragment key={post.id}>
-              <ListItem
-                alignItems="flex-start"
-                sx={{
-                  bgcolor: highlightPostId === post.id ? '#ffeb3b' : '#fff',
-                  borderRadius: 2,
-                  boxShadow: 1,
-                  mb: 2,
-                  cursor: 'pointer',
-                  maxWidth: '650px',
-                  transition: 'transform 0.3s, background-color 0.3s',
-
-                }}
-                onClick={() => navigate(`/post/${post.id}`)}
-              >
-                <ListItemText
-                  primary={
-                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#444' }}>
-                      {`${index + 1}. ${post.title}`}
-                    </Typography>
-                  }
-                  secondary={
-                    <>
-                      <Typography variant="body1" sx={{ mt: 1, color: '#666' }}>
-                        {post.content}
-                      </Typography>
-                      <Box mt={2}>
-                        {post.tags &&
-                          post.tags.map((tag, index) => (
-                            <Chip
-                              key={index}
-                              label={`${tag.course_name} (${tag.course_code})`}
-                              sx={{ mr: 1, bgcolor: '#e0f7fa', color: '#00796b' }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/posts-by-tag/${tag.id}`)
-                              }}
-                            />
-                          ))}
-                      </Box>
-                      <Typography variant="caption" sx={{ mt: 1, color: '#999', display: 'block' }}>
-                        {new Date(post.created_at).toLocaleString()}
-                      </Typography>
-                    </>
-                  }
-                />
-                
-              </ListItem>
-              <Divider component="li" />
-            </React.Fragment>
-          ))} */}
           {userPosts.map((post) => (
             <Card
               key={post.id}
@@ -148,12 +119,10 @@ const SearchResults = () => {
                 },
               }}
               onClick={(e) => {
-                // e.stopPropagation();
                 navigate(`/post/${post.id}`)
               }}
             >
               <CardContent>
-
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Box display="flex" alignItems="center" gap={1}>
                     <Avatar>{post.username?.charAt(0) || post.user?.name?.charAt(0)}</Avatar>
@@ -165,10 +134,8 @@ const SearchResults = () => {
                     <Typography variant="caption" color="text.secondary">
                       {post.time || format(parseISO(post.created_at), "MMMM d, yyyy h:mm a")}
                     </Typography>
-
                   </Box>
                 </Box>
-
 
                 <Typography variant="h6" fontWeight="bold" gutterBottom>
                   {post.title}
@@ -259,10 +226,8 @@ const SearchResults = () => {
           No posts available.
         </Typography>
       )}
-
     </Box>
   );
-
-}
+};
 
 export default SearchResults;
