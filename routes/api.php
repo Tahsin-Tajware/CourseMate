@@ -46,8 +46,8 @@ Route::get('get-all-post', [PostController::class, 'getAllPost']);
 Route::get('comment/{post_id}', [CommentController::class, 'getAllComments']);
 Route::get('post_by_id/{post_id}', [PostController::class, 'getPostById']);
 Route::get('post_by_tag/{tag_id}', [PostController::class, 'getPostsByTag']);
+Route::get('posts/search', [PostController::class, 'search']);
 //protected routes
-
 Broadcast::routes(['middleware' => ['auth:api']]);
 Route::middleware(['auth:api'])->group(function () {
   //user-info
@@ -56,20 +56,21 @@ Route::middleware(['auth:api'])->group(function () {
   Route::put('update-profile/{id}', [AuthController::class, 'update']);
 
   //post-related
-  Route::post('create-post', [PostController::class, 'createPost']);
+  Route::post('create-post', [PostController::class, 'createPost']); //
   Route::get('no_of_my_post', [PostController::class, 'getNoOfMyPosts']);
   Route::get('my_post', [PostController::class, 'getMyPost']);
-  Route::put('update_post/{post_id}', [PostController::class, 'updatePost']);
+  Route::put('update_post/{post_id}', [PostController::class, 'updatePost']); //
   Route::delete('delete_post/{post_id}', [PostController::class, 'deletePost']);
 
+
   //saved post-related
-  Route::post('save-post/{post_id}', [SavedPostController::class, 'save_post']);
+  Route::post('save-post/{post_id}', [SavedPostController::class, 'save_post']); //
   Route::delete('unsave-post/{post_id}', [SavedPostController::class, 'delete_saved_post']);
   Route::get('saved-post', [SavedPostController::class, 'get_saved_posts']);
 
   //comment-related
-  Route::post('vote', [VoteController::class, 'store']);
-  Route::delete('vote/{voteId}', [VoteController::class, 'destroy']);
+  Route::post('vote', [VoteController::class, 'store']); //
+  Route::delete('vote/{voteId}', [VoteController::class, 'destroy']); //
 
   Route::post('comment/{post_id}', [CommentController::class, 'storeComment']);
   Route::delete('comment/{comment_id}', [CommentController::class, 'deleteComment']);

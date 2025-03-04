@@ -14,6 +14,7 @@ import UpdatePost from "./views/updatePost.jsx";
 import PostByTag from "./views/postByTag.jsx";
 import PostById from "./views/postById.jsx";
 import SavedPost from "./views/savedPost.jsx";
+import SearchResults from "./views/searchPage.jsx";
 const router = createBrowserRouter([
   {
     element: <Layout />,
@@ -26,6 +27,8 @@ const router = createBrowserRouter([
       { path: '/about', element: <About /> },
       { path: "/posts-by-tag/:tag_id", element: <PostByTag /> },
       { path: '/post/:post_id', element: <PostById /> },
+      { path: '/search/:query', element: <SearchResults /> },
+
       // Protected routes
       {
         element: <ProtectedRoute />,
