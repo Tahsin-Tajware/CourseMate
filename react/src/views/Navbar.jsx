@@ -33,7 +33,18 @@ const Navbar = ({ onToggleSidebar }) => {
   const [notifications, setNotifications] = useState([]);
   const [count_unread, setCountUnread] = useState(0);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [query, setQuery] = useState("");
   const openMenu = Boolean(menuAnchorEl);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+
+      //navigate(`/search?query=${encodeURIComponent(query)}`);
+      console.log(query)
+      navigate(`search/${query}`);
+    }
+  };
 
   const handleMenuClick = (event) => {
     setMenuAnchorEl(event.currentTarget);
@@ -194,7 +205,7 @@ const Navbar = ({ onToggleSidebar }) => {
           }}
           onClick={handleSearchClick}
         >
-          <SearchIcon fontSize="medium" />
+          {/* <SearchIcon fontSize="medium" /> */}
         </IconButton>
         <IconButton
           onClick={() => handleNotificationClick}
@@ -241,6 +252,7 @@ const Navbar = ({ onToggleSidebar }) => {
             right: 0,
             zIndex: 1000,
           }}
+          onSubmit={handleSubmit}
         >
           <InputBase
             sx={{
@@ -253,9 +265,12 @@ const Navbar = ({ onToggleSidebar }) => {
             inputProps={{ "aria-label": "search" }}
             onBlur={handleSearchBlur}
             autoFocus
+
+
+
           />
           <IconButton type="submit" sx={{ p: "10px", color: "#FF6D00" }}>
-            <SearchIcon />
+
           </IconButton>
         </Paper>
       </Collapse>
@@ -279,6 +294,7 @@ const Navbar = ({ onToggleSidebar }) => {
             px: 2,
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
           }}
+          onSubmit={handleSubmit}
         >
           <IconButton type="submit" sx={{ p: "10px", color: "#666" }}>
             <SearchIcon />
@@ -292,6 +308,8 @@ const Navbar = ({ onToggleSidebar }) => {
             }}
             placeholder="Search for questions or tags..."
             inputProps={{ "aria-label": "search" }}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
           />
         </Paper>
       </Box>
