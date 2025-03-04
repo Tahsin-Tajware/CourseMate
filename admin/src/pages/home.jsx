@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Typography,
   Box,
@@ -7,7 +8,6 @@ import {
   Grid,
   Paper,
   IconButton,
-  Avatar,
   useTheme,
 } from "@mui/material";
 import {
@@ -15,12 +15,10 @@ import {
   Comment,
   PostAdd,
   Report,
+  LocalOffer,
   TrendingUp,
   TrendingDown,
   Reply,
-  ModeComment,
-  ArrowUpward,
-  ArrowDownward,
 } from "@mui/icons-material";
 import { keyframes } from "@emotion/react";
 import {
@@ -33,7 +31,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import axiosPrivate from "../api/axiosPrivate";
 
+const API_BASE_URL = "http://127.0.0.1:8000/api/admin";
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -45,68 +45,91 @@ const fadeIn = keyframes`
 
 const Home = () => {
   const theme = useTheme();
+  const [overview, setOverview] = useState(null);
+
+  useEffect(() => {
+    // Fetch data from the dailyOverview API
+    axiosPrivate.get('/admin/daily-overview')
+      .then(response => {
+        setOverview(response.data);
+      })
+      .catch(error => {
+        console.error("There was an error fetching the overview data!", error);
+      });
+  }, []);
 
   const stats = [
     {
       title: "Total Users",
-      value: "150",
+      value: overview ? overview.total_users : "Loading...",
       icon: <People />,
-      color: "primary",
+      color: "#4CAF50", // Professional green
     },
     {
-      title: "Comments",
-      value: "345",
+      title: "Total Comments",
+      value: overview ? overview.total_comments : "Loading...",
       icon: <Comment />,
-      color: "secondary",
+      color: "#2196F3", // Professional blue
     },
     {
-      title: "Posts",
-      value: "275",
+      title: "Total Posts",
+      value: overview ? overview.total_posts : "Loading...",
       icon: <PostAdd />,
-      color: "success",
+      color: "#FF9800", // Professional orange
     },
     {
-      title: "Reports",
-      value: "45",
+      title: "Total Tags",
+      value: overview ? overview.total_tags : "Loading...",
+      icon: <LocalOffer />,
+      color: "#9E9E9E", // Professional grey
+    },
+    {
+      title: "New Users",
+      value: overview ? overview.new_users : "Loading...",
+      icon: <People />,
+      color: "#FF5722", // Professional deep orange
+    },
+    {
+      title: "New Comments",
+      value: overview ? overview.new_comments : "Loading...",
+      icon: <Comment />,
+      color: "#673AB7", // Professional deep purple
+    },
+    {
+      title: "New Posts",
+      value: overview ? overview.new_posts : "Loading...",
+      icon: <PostAdd />,
+      color: "#E91E63", // Professional pink
+    },
+    {
+      title: "New Tags",
+      value: overview ? overview.new_tags : "Loading...",
+      icon: <LocalOffer />,
+      color: "#9C27B0", // Professional purple
+    },
+    {
+      title: "Reported Comments",
+      value: overview ? overview.reported_comments_today : "Loading...",
       icon: <Report />,
-      color: "warning",
+      color: "#F44336", // Professional red
     },
   ];
 
   const charts = [
     {
       title: "New Users",
-      data: [10, 12, 14, 16, 18, 20, 22],
+      data: overview ? [overview.new_users] : [0],
       trend: "up",
     },
     {
       title: "New Comments",
-      data: [5, 10, 15, 10, 15, 20, 25],
+      data: overview ? [overview.new_comments] : [0],
       trend: "down",
     },
     {
       title: "Post Engagement",
-      data: [20, 25, 30, 35, 40, 45, 50],
+      data: overview ? [overview.new_posts] : [0],
       trend: "up",
-    },
-  ];
-
-  const posts = [
-    {
-      id: 1,
-      username: "Sonod",
-      time: "30 mins",
-      votes: 50,
-      answers: 2,
-      content: "This is an example post content for the first post.",
-    },
-    {
-      id: 2,
-      username: "Tamim",
-      time: "25 mins",
-      votes: 48,
-      answers: 5,
-      content: "Here's another example of a post with similar styling.",
     },
   ];
 
@@ -118,30 +141,19 @@ const Home = () => {
 
   return (
     <Box p={3} sx={{ animation: `${fadeIn} 1s ease-in-out` }}>
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{
-          fontWeight: "bold",
-          color: "black", // Change text color to black
-          textAlign: "center",
-          mb: 3,
-        }}
-      >
-        Admin Dashboard
-      </Typography>
+      
       <Grid container spacing={3}>
         {stats.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Grid item xs={12} sm={6} md={4} key={index}>
             <Paper
               sx={{
-                p: 3,
+                p: 2,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                bgcolor: (theme) => theme.palette[stat.color].light,
-                borderRadius: 3,
-                boxShadow: 3,
+                bgcolor: stat.color, // Professional background color
+                borderRadius: 2,
+                boxShadow: 2,
                 transition: "transform 0.3s",
                 "&:hover": {
                   transform: "scale(1.05)",
@@ -150,16 +162,16 @@ const Home = () => {
             >
               <Box
                 sx={{
-                  fontSize: 40,
-                  color: (theme) => theme.palette[stat.color].main,
+                  fontSize: 30,
+                  color: "white", // White icon color for contrast
                 }}
               >
                 {stat.icon}
               </Box>
-              <Typography variant="h6" sx={{ mt: 1, color: "text.secondary" }}>
+              <Typography variant="h6" sx={{ mt: 1, color: "white" }}>
                 {stat.title}
               </Typography>
-              <Typography variant="h5" sx={{ mt: 1, fontWeight: "bold" }}>
+              <Typography variant="h5" sx={{ mt: 1, fontWeight: "bold", color: "white" }}>
                 {stat.value}
               </Typography>
             </Paper>
@@ -173,8 +185,8 @@ const Home = () => {
             <Grid item xs={12} md={4} key={index}>
               <Card
                 sx={{
-                  borderRadius: 3,
-                  boxShadow: 3,
+                  borderRadius: 2,
+                  boxShadow: 2,
                   transition: "transform 0.3s",
                   "&:hover": {
                     transform: "scale(1.05)",
@@ -196,7 +208,7 @@ const Home = () => {
                         type="monotone"
                         dataKey="value"
                         stroke={getDynamicColor(index)}
-                        strokeWidth={4} 
+                        strokeWidth={4}
                         activeDot={{ r: 8 }}
                       />
                     </LineChart>
@@ -235,73 +247,6 @@ const Home = () => {
             </Grid>
           ))}
         </Grid>
-      </Box>
-
-      <Box mt={4}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
-          Recent Posts
-        </Typography>
-        {posts.map((post) => (
-          <Card
-            key={post.id}
-            sx={{
-              bgcolor: "background.paper",
-              mb: 2,
-              borderRadius: 3,
-              boxShadow: 2,
-              transition: "transform 0.3s",
-              "&:hover": {
-                transform: "scale(1.02)",
-              },
-            }}
-          >
-            <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Box display="flex" alignItems="center" gap={2}>
-                <Avatar sx={{ bgcolor: "primary.main", color: "primary.contrastText" }}>
-                  {post.username[0]}
-                </Avatar>
-                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                  {post.username}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {post.time} ago
-                </Typography>
-              </Box>
-
-              <Typography variant="body1" color="text.primary">
-                {post.content}
-              </Typography>
-
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                mt={1}
-                px={1}
-                color="text.secondary"
-              >
-                <Box display="flex" alignItems="center" gap={1}>
-                  <IconButton size="small" color="primary">
-                    <ArrowUpward fontSize="small" />
-                  </IconButton>
-                  <Typography variant="body2">{post.votes}</Typography>
-                  <IconButton size="small" color="secondary">
-                    <ArrowDownward fontSize="small" />
-                  </IconButton>
-                </Box>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <ModeComment fontSize="small" />
-                  <Typography variant="body2">
-                    {post.answers} Answers
-                  </Typography>
-                </Box>
-                <IconButton size="small" color="inherit">
-                  <Reply fontSize="small" />
-                </IconButton>
-              </Box>
-            </CardContent>
-          </Card>
-        ))}
       </Box>
     </Box>
   );

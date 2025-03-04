@@ -58,6 +58,9 @@ const PostById = () => {
   const [replyImages, setReplyImages] = useState([]);
   const [replyPdf, setReplyPdf] = useState(null);
   const [hasAttachments, setHasAttachments] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportingCommentId, setReportingCommentId] = useState(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -345,6 +348,20 @@ const PostById = () => {
     }
   };
 
+  const handleReportComment = async () => {
+    if (reportReason.trim()) {
+      try {
+        await axiosPrivate.post(`/comment/report/${reportingCommentId}`, { reason: reportReason });
+        setReportDialogOpen(false);
+        setReportReason("");
+        setReportingCommentId(null);
+        alert("Comment reported successfully!");
+      } catch (error) {
+        console.error("Error reporting comment:", error);
+      }
+    }
+  };
+
   // Recursively render comments and nested replies
   const renderComments = (commentList) =>
     commentList.map((comment) => (
@@ -484,7 +501,11 @@ const PostById = () => {
                   <MenuItem onClick={() => handleDeleteComment(comment.id)}>Delete</MenuItem>
                 </>
               ) : (
-                <MenuItem onClick={handleMenuClose}>Report</MenuItem>
+                <MenuItem onClick={() => {
+                  setReportDialogOpen(true);
+                  setReportingCommentId(comment.id);
+                  handleMenuClose(); // Close the menu when opening the report dialog
+                }}>Report</MenuItem>
               )}
             </Menu>
           </Box>
@@ -502,14 +523,21 @@ const PostById = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Tooltip title='Add Attachment'>
-                        <IconButton onClick={handleMenuOpen}>
+                      <Tooltip title="Add Attachment">
+                        <IconButton onClick={() => document.getElementById('reply-file-upload').click()}>
                           <AttachFileIcon />
                         </IconButton>
                       </Tooltip>
                     </InputAdornment>
                   ),
                 }}
+              />
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => handleFileUpload(e, e.target.files[0].type.startsWith('image/') ? 'image' : 'pdf', true)}
+                style={{ display: 'none' }}
+                id="reply-file-upload"
               />
               {(replyImages.length > 0 || replyPdf) && (
                 <>
@@ -667,78 +695,84 @@ const PostById = () => {
       </Card>
 
       {/* Add new comment */}
-<Box width="100%" mb={4}>
-  <TextField
-    label="Add a comment"
-    variant="outlined"
-    fullWidth
-    multiline
-    rows={isMobile ? 3 : 5}
-    value={newComment}
-    onChange={(e) => setNewComment(e.target.value)}
-    sx={{ mb: 2 }}
-    InputProps={{
-      endAdornment: (
-        <InputAdornment position="end">
-          <Tooltip title='Add Attachment'>
-            <IconButton onClick={handleMenuOpen}>
-              <AttachFileIcon />
-            </IconButton>
-          </Tooltip>
-        </InputAdornment>
-      ),
-    }}
-  />
-  {(commentImages.length > 0 || commentPdf) && (
-    <>
-      <Typography variant="subtitle1" sx={{ fontWeight: "bold", textAlign: "left" }}>
-        Attachments
-      </Typography>
-      {commentImages.length > 0 && (
-        <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {commentImages.map((image, index) => (
-            <Box key={index} sx={{ position: 'relative' }}>
-              <img
-                src={URL.createObjectURL(image)}
-                alt={`Selected ${index}`}
-                style={{ maxHeight: '50px', cursor: 'pointer' }}
-              />
-              <IconButton
-                size="small"
-                sx={{ position: 'absolute', top: -10, right: -10, backgroundColor: 'white' }}
-                onClick={() => handleRemoveImage(index)}
-              >
-                <RemoveCircleIcon sx={{ fontSize: "20px", color: "red" }} />
-              </IconButton>
-            </Box>
-          ))}
-        </Box>
-      )}
-      {commentPdf && (
-        <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <PictureAsPdfIcon color="secondary" />
-          <Typography variant="body2">
-            {commentPdf.name}
-          </Typography>
-          <IconButton size="small" onClick={handleRemovePdf}>
-            <RemoveCircleIcon sx={{ fontSize: "20px", color: "red" }} />
-          </IconButton>
-        </Box>
-      )}
-    </>
-  )}
-  <Button
-    variant="contained"
-    color="primary"
-    onClick={(e) => {
-      e.preventDefault();
-      handleAddComment();
-    }}
-  >
-    Add Comment
-  </Button>
-</Box>
-
+      <Box width="100%" mb={4}>
+        <TextField
+          label="Add a comment"
+          variant="outlined"
+          fullWidth
+          multiline
+          rows={isMobile ? 3 : 5}
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          sx={{ mb: 2 }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Tooltip title="Add Attachment">
+                  <IconButton onClick={() => document.getElementById('comment-file-upload').click()}>
+                    <AttachFileIcon />
+                  </IconButton>
+                </Tooltip>
+              </InputAdornment>
+            ),
+          }}
+        />
+        <input
+          type="file"
+          accept="image/*,application/pdf"
+          onChange={(e) => handleFileUpload(e, e.target.files[0].type.startsWith('image/') ? 'image' : 'pdf')}
+          style={{ display: 'none' }}
+          id="comment-file-upload"
+        />
+        {(commentImages.length > 0 || commentPdf) && (
+          <>
+            <Typography variant="subtitle1" sx={{ fontWeight: "bold", textAlign: "left" }}>
+              Attachments
+            </Typography>
+            {commentImages.length > 0 && (
+              <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {commentImages.map((image, index) => (
+                  <Box key={index} sx={{ position: 'relative' }}>
+                    <img
+                      src={URL.createObjectURL(image)}
+                      alt={`Selected ${index}`}
+                      style={{ maxHeight: '50px', cursor: 'pointer' }}
+                    />
+                    <IconButton
+                      size="small"
+                      sx={{ position: 'absolute', top: -10, right: -10, backgroundColor: 'white' }}
+                      onClick={() => handleRemoveImage(index)}
+                    >
+                      <RemoveCircleIcon sx={{ fontSize: "20px", color: "red" }} />
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
+            )}
+            {commentPdf && (
+              <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PictureAsPdfIcon color="secondary" />
+                <Typography variant="body2">
+                  {commentPdf.name}
+                </Typography>
+                <IconButton size="small" onClick={handleRemovePdf}>
+                  <RemoveCircleIcon sx={{ fontSize: "20px", color: "red" }} />
+                </IconButton>
+              </Box>
+            )}
+          </>
+        )}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={(e) => {
+            e.preventDefault();
+            handleAddComment();
+          }}
+        >
+          Add Comment
+        </Button>
+      </Box>
 
       {/* Comments Section */}
       <Card sx={{ bgcolor: "background.paper", borderRadius: 2, boxShadow: 3, p: 3 }}>
@@ -755,39 +789,27 @@ const PostById = () => {
         )}
       </Card>
 
-      <Menu
-        id="comment-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleFileUpload(e, 'image', replyingTo !== null)}
-            style={{ display: 'none' }}
-            id="image-upload"
-            multiple
+      {/* Report Dialog */}
+      <Dialog open={reportDialogOpen} onClose={() => setReportDialogOpen(false)}>
+        <DialogContent>
+          <Typography variant="h6" gutterBottom>
+            Report Comment
+          </Typography>
+          <TextField
+            label="Enter report reason"
+            variant="outlined"
+            fullWidth
+            multiline
+            rows={4}
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value)}
+            sx={{ mb: 2 }}
           />
-          <label htmlFor="image-upload">
-            Upload Image
-          </label>
-        </MenuItem>
-        <MenuItem>
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={(e) => handleFileUpload(e, 'pdf', replyingTo !== null)}
-            style={{ display: 'none' }}
-            id="pdf-upload"
-          />
-          <label htmlFor="pdf-upload">
-            Upload PDF
-          </label>
-        </MenuItem>
-      </Menu>
+          <Button variant="contained" color="primary" onClick={handleReportComment}>
+            Submit Report
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Container>
   );
 };

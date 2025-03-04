@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, List, ListItem, ListItemIcon, ListItemText, Drawer } from "@mui/material";
-import { Home, People, Notifications, Person, BookmarkBorder, Delete, Info } from "@mui/icons-material";
+import { Home, People, Notifications, Person, BookmarkBorder, Delete, Info,Report  } from "@mui/icons-material";
 import { Link, useLocation } from "react-router-dom";
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -8,13 +8,13 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const navItems = [
     { text: "Dashboard", icon: <Home />, path: "/" },
-    { text: "All Users", icon: <People />, path: "/all-users" },
-    { text: "Notifications", icon: <Notifications />, path: "/notifications" },
-    { text: "Profile", icon: <Person />, path: "/profile" },
-    { text: "All Posts", icon: <BookmarkBorder />, path: "/all-posts" },
-    { text: "All Tags", icon: <BookmarkBorder />, path: "/all-tags" },
-    { text: "Deleted Users", icon: <Delete />, path: "/deleted-users" },
-    { text: "Information", icon: <Info />, path: "/information" },
+    // { text: "All Users", icon: <People />, path: "/all-users" },
+    { text: "Reports", icon: <Report  />, path: "/reports" },
+    // { text: "Profile", icon: <Person />, path: "/profile" },
+    // { text: "All Posts", icon: <BookmarkBorder />, path: "/all-posts" },
+    // { text: "All Tags", icon: <BookmarkBorder />, path: "/all-tags" },
+    // { text: "Deleted Users", icon: <Delete />, path: "/deleted-users" },
+    // { text: "Information", icon: <Info />, path: "/information" },
   ];
 
   const handleItemClick = () => {
