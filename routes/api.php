@@ -8,9 +8,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SavedPostController;
 use App\Http\Controllers\VoteController;
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\AdminReportController;
 
 Route::group(
   ['prefix' => 'auth'],
@@ -27,6 +26,19 @@ Route::group(
     Route::post('auth/login', [AuthController::class, 'adminLogin']);
   }
 );
+Route::group([
+  'prefix' => 'admin',
+  'middleware' => ['auth:api', 'checkAdmin']
+], function () {
+  Route::get('reports', [AdminReportController::class, 'index']);
+  Route::put('reports/resolve/{report_id}', [AdminReportController::class, 'resolve']);
+  Route::put('reports/review/{report_id}', [AdminReportController::class, 'markReportReviewed']);
+  Route::delete('removeComment/{comment_id}', [AdminReportController::class, 'removeComment']);
+  Route::delete('removePost/{Post_id}', [AdminReportController::class, 'removePost']);
+  Route::put('blockUser/{user_id}', [AdminReportController::class, 'blockUser']);
+
+  Route::get('daily-overview', [AdminReportController::class, 'dailyOverview']);
+});
 
 //no access token needed
 Route::post('refresh', [AuthController::class, 'refresh']);
@@ -62,7 +74,7 @@ Route::middleware(['auth:api'])->group(function () {
   Route::post('comment/{post_id}', [CommentController::class, 'storeComment']);
   Route::delete('comment/{comment_id}', [CommentController::class, 'deleteComment']);
   Route::put('update-comment/{comment_id}', [CommentController::class, 'updateComment']);
-
+  Route::post('comment/report/{comment_id}', [ReportController::class, 'reportComment']);
   //notification-related
   Route::get('notification', [NotificationController::class, 'getAllNotifications']);
   Route::get('notification/unread', [NotificationController::class, 'getUnreadNotifications']);
