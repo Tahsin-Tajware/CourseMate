@@ -15,10 +15,10 @@ return new class extends Migration
       //$table->dropForeign(['comment_id']);
 
 
-      $table->foreign('comment_id')
-        ->references('id')
-        ->on('comment')
-        ->onDelete('cascade');
+      // $table->foreign('comment_id')
+      //   ->references('id')
+      //   ->on('comment')
+      //   ->onDelete('cascade');
     });
   }
 

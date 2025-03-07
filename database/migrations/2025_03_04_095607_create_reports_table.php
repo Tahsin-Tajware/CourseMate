@@ -15,7 +15,7 @@ return new class extends Migration
       Schema::create('reports', function (Blueprint $table) {
         $table->id();
         $table->foreignId('user_id')->constrained()->onDelete('cascade');
-        $table->foreign('comment_id')->references('id')->on('comment')->onDelete('cascade');
+        $table->foreignId('comment_id')->references('id')->on('comment')->onDelete('cascade');
 
         $table->text('reason');
         $table->enum('status', ['pending', 'reviewed', 'resolved'])->default('pending');

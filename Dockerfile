@@ -62,7 +62,7 @@ EXPOSE 80
 RUN echo '#!/bin/bash\n\
   cd /var/www/html\n\
   echo "Running fresh database migrations..."\n\
-  php artisan migrate:fresh --force\n\
+  php artisan migrate --force\n\
   echo "Starting Apache server..."\n\
   apache2-foreground' > /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
