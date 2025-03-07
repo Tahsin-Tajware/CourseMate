@@ -44,8 +44,6 @@ EXPOSE 80
 # Enable Apache mod_rewrite for Laravel (important for routes)
 RUN a2enmod rewrite
 
-# Configure Apache to serve Laravel and React
-COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
 # Start Apache server
 CMD ["apache2-foreground"]
