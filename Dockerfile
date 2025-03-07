@@ -14,7 +14,6 @@ RUN npm run build
 FROM php:8.2-apache
 # Enable Apache modules
 RUN a2enmod rewrite
-
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
   git \
@@ -25,55 +24,45 @@ RUN apt-get update && apt-get install -y \
   libpq-dev \
   zip \
   unzip
-
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd
-
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
 # Set working directory
 WORKDIR /var/www/html
-
 # Copy composer files and install dependencies
 COPY composer.json composer.lock ./
 RUN composer install --no-scripts --no-autoloader --no-dev
-
 # Copy Laravel files
 COPY . /var/www/html/
-
 # Copy built React app from the first stage
 COPY --from=react-builder /app/dist /var/www/html/public/react
-
 # Generate optimized autoloader and run scripts
 RUN composer dump-autoload --optimize --no-dev
 RUN composer run-script post-autoload-dump
-
 # Create .env file if it doesn't exist
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
-
 # Generate key and optimize
 RUN php artisan key:generate --force
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
-
 # Configure Apache document root
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
-
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
-
 # Expose port 80
 EXPOSE 80
-
-# Start script to run migrations and start Apache
-RUN echo '#!/bin/bash\ncd /var/www/html\nphp artisan migrate --force\napache2-foreground' > /usr/local/bin/start.sh
+# Updated start script with migrate:fresh
+RUN echo '#!/bin/bash\n\
+  cd /var/www/html\n\
+  echo "Running fresh database migrations..."\n\
+  php artisan migrate:fresh --force\n\
+  echo "Starting Apache server..."\n\
+  apache2-foreground' > /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
-
 # Start Apache
 CMD ["/usr/local/bin/start.sh"]
