@@ -1,10 +1,10 @@
-# Use official PHP image with necessary extensions
-FROM php:8.2.12-fpm
+# Use official PHP image with Apache and necessary extensions
+FROM php:8.2.12-apache
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Install dependencies
+# Install dependencies for PHP, Composer, and Apache
 RUN apt-get update && apt-get install -y \
   libpq-dev \
   zip \
@@ -17,6 +17,10 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Install Node.js & NPM for React frontend
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+  apt-get install -y nodejs
+
 # Copy Laravel backend files
 COPY . .
 
@@ -26,22 +30,22 @@ RUN composer install --no-dev --optimize-autoloader
 # Set permissions for Laravel storage and cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Install Node.js & NPM for React frontend
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-  apt-get install -y nodejs
-
-# Install npm dependencies for React frontend
+# Build React frontend
 WORKDIR /var/www/html/react
 RUN npm install
-
-# Build React frontend
 RUN npm run build
 
-# Set working directory back to Laravel root
-WORKDIR /var/www/html
+# Copy React build to Laravel's public folder
+RUN cp -r build/* /var/www/html/public/
 
-# Expose port for PHP-FPM
-EXPOSE 9000
+# Expose necessary ports (Apache typically runs on port 80)
+EXPOSE 80
 
-# Start PHP-FPM
-CMD ["php-fpm"]
+# Enable Apache mod_rewrite for Laravel (important for routes)
+RUN a2enmod rewrite
+
+# Configure Apache to serve Laravel and React
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Start Apache server
+CMD ["apache2-foreground"]
