@@ -43,7 +43,7 @@ COPY --from=react-builder /app/dist /var/www/html/public/react
 RUN composer dump-autoload --optimize --no-dev
 RUN composer run-script post-autoload-dump
 # Create .env file if it doesn't exist
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
+# RUN if [ ! -f .env ]; then cp .env.example .env; fi
 # Generate key and optimize
 RUN php artisan key:generate --force
 RUN php artisan config:cache
