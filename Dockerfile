@@ -22,8 +22,6 @@ RUN apt-get update && apt-get install -y \
   libpq-dev \
   zip \
   unzip
-
-
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install PHP extensions
@@ -58,8 +56,6 @@ RUN chown -R www-data:www-data /var/www/html \
 # Expose port 80
 EXPOSE 80
 # Updated start script with migrate:fresh
-
-
 RUN echo '#!/bin/bash\n\
   cd /var/www/html\n\
   echo "Running fresh database migrations..."\n\
@@ -67,12 +63,6 @@ RUN echo '#!/bin/bash\n\
   echo "migration complete"\n\
   echo "Starting Apache server..."\n\
   apache2-foreground' > /usr/local/bin/start.sh
-
-
-
-
-
-
 RUN chmod +x /usr/local/bin/start.sh
 # Start Apache
 CMD ["/usr/local/bin/start.sh"]
