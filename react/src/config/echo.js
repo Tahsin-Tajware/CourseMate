@@ -7,7 +7,7 @@ const echo = new Echo({
   key: import.meta.env.VITE_PUSHER_APP_KEY,
   cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
   encrypted: true,
-  authEndpoint: 'http://127.0.0.1:8000/api/broadcasting/auth',
+  authEndpoint: 'https://coursemate-p3ye.onrender.com/api/broadcasting/auth',
   auth: {
     headers: {
       Authorization: `Bearer ${localStorage.getItem('access_token')}`

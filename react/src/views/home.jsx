@@ -17,21 +17,25 @@ import {
   useMediaQuery,
   Menu,
   MenuItem,
+  Drawer,
+  Collapse,
 } from "@mui/material";
-import { ArrowUpward, ArrowDownward, Reply, ModeComment, MoreVert } from "@mui/icons-material";
+import { ArrowUpward, ArrowDownward, ModeComment, MoreVert, ExpandMore, Close } from "@mui/icons-material";
 import axiosPrivate, { customAxios } from "../api/axiosPrivate";
 import { useAuth } from "../context/authContext";
 import { format, parseISO } from "date-fns";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
-  const [showAllPosts, setShowAllPosts] = useState(false);
   const [auth] = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
+  const [selectedPostComments, setSelectedPostComments] = useState([]);
+  const [expandedComments, setExpandedComments] = useState({});
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     async function fetchPosts() {
@@ -118,6 +122,103 @@ const Home = () => {
     }
   };
 
+  const fetchComments = async (postId) => {
+    try {
+      const res = await customAxios.get(`/comment/${postId}`);
+      const fetched = res.data.comments.original || [];
+      setSelectedPostComments(fetched);
+
+      const initialExpanded = {};
+      fetched.forEach((c) => {
+        if (!c.parent_id) {
+          initialExpanded[c.id] = true;
+        }
+      });
+      setExpandedComments(initialExpanded);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
+
+  const handleShowComments = (postId) => {
+    fetchComments(postId);
+    setDrawerOpen(true);
+  };
+
+  const toggleExpand = (commentId) => {
+    setExpandedComments((prev) => ({
+      ...prev,
+      [commentId]: !prev[commentId],
+    }));
+  };
+
+  const renderComments = (commentList) =>
+    commentList.length > 0 ? (
+      commentList.map((comment) => (
+        <Box
+          key={comment.id}
+          sx={{
+            borderLeft: `1px solid ${theme.palette.grey[300]}`,
+            borderRadius: "8px 0 0 8px",
+            pl: 2,
+            mb: 2,
+            width: "100%",
+            fontSize: isMobile ? "14px" : "16px", // Adjust font size
+          }}
+        >
+          <Box display="flex" justifyContent="flex-start" alignItems="center" mb={1}>
+            <Box display="flex" alignItems="center" gap={1}>
+              {comment.parent_id && (
+                <IconButton
+                  size="small"
+                  onClick={() => toggleExpand(comment.id)}
+                  sx={{
+                    transition: "transform 0.2s",
+                    transform: expandedComments[comment.id] ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                >
+                  <ExpandMore fontSize="small" />
+                </IconButton>
+              )}
+              <Avatar sx={{ bgcolor: theme.palette.grey[500] }}>
+                {comment.user?.name?.charAt(0) || comment.username?.charAt(0)}
+              </Avatar>
+              <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
+                {comment.user?.name || comment.username}
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary" ml={2}>
+              {format(parseISO(comment.created_at), "MMMM d, yyyy h:mm a")}
+            </Typography>
+          </Box>
+
+          <Collapse
+            in={!comment.parent_id || expandedComments[comment.id]}
+            timeout="auto"
+            unmountOnExit
+          >
+            <Typography
+              variant="body1"
+              color="text.primary"
+              sx={{ wordBreak: "break-word", textAlign: "left", ml: 7 }}
+            >
+              {comment.content}
+            </Typography>
+
+            {comment.replies && comment.replies.length > 0 && (
+              <Box pl={4} mt={2}>
+                {renderComments(comment.replies)}
+              </Box>
+            )}
+          </Collapse>
+        </Box>
+      ))
+    ) : (
+      <Typography variant="body1" color="text.secondary" textAlign="center">
+        No Comments
+      </Typography>
+    );
+
   const sortedPosts = [...posts].sort(
     (a, b) =>
       new Date(b.created_at || b.time) - new Date(a.created_at || a.time)
@@ -135,167 +236,138 @@ const Home = () => {
           </Typography>
         </Box>
 
-        <Grid container spacing={3}>
-          {/* Main Section */}
+        <Grid container justifyContent="center" spacing={3}>
           <Grid item xs={12} md={8}>
-            {sortedPosts.map((post) => (
-              <Card
-                key={post.id}
-                sx={{
-                  bgcolor: "background.paper",
-                  borderRadius: 2,
-                  boxShadow: 3,
-                  mb: 3,
-                  width: "100%",
-                  cursor: "pointer",
-                  "&:hover .post-actions": {
-                    visibility: "visible",
-                  },
-                }}
-                onClick={() => handleNavigatePostById(post.id)}
-              >
-                <CardContent>
-                 
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Avatar>{post.username?.charAt(0) || post.user?.name?.charAt(0)}</Avatar>
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        {post.username || post.user?.name}
-                      </Typography>
-                    </Box>
-                    <Box display="flex" alignItems="center">
-                      <Typography variant="caption" color="text.secondary">
-                        {post.time || format(parseISO(post.created_at), "MMMM d, yyyy h:mm a")}
-                      </Typography>
-                      <IconButton
-                        className="post-actions"
-                        size="small"
-                        sx={{ visibility: "hidden", ml: 1 }}
-                        onClick={(e) => handleMenuClick(e, post.id)}
-                      >
-                        <MoreVert fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  </Box>
-
-                  
-                  <Typography variant="h6" fontWeight="bold" gutterBottom>
-                    {post.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.primary" fontSize={20} textAlign="start" mb={2}>
-                    {post.content}
-                  </Typography>
-
-                  {/* Tags */}
-                  <Stack direction="row" spacing={2} mt={1} flexWrap="wrap">
-                    {post.tags?.map((tag, index) => (
-                      <Chip
-                        key={index}
-                        label={`${tag.course_code} - ${tag.course_name}`}
-                        sx={{
-                          bgcolor: "transparent",
-                          color: theme.palette.text.primary,
-                          borderRadius: 1,
-                          fontWeight: "bold",
-                          margin: "4px",
-                          border: `1px solid ${theme.palette.grey[400]}`,
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleGetPostByTag(tag.id, tag.course_code, tag.course_name);
-                        }}
-                      />
-                    ))}
-                    {post.tags?.[0] && (
-                      <Chip
-                        label={post.tags[0].varsity}
-                        sx={{
-                          bgcolor: "transparent",
-                          color: theme.palette.primary.main,
-                          borderRadius: 1,
-                          fontWeight: "bold",
-                          margin: "4px",
-                          border: `1px solid ${theme.palette.primary.main}`,
-                        }}
-                      />
-                    )}
-                  </Stack>
-
-                  {/* Voting + Comments */}
-                  <Grid container alignItems="center" justifyContent="space-between" mt={2}>
-                    <Grid item display="flex" alignItems="center">
-                      <IconButton
-                        size="small"
-                        color={post.user_vote === 1 ? "primary" : "default"}
-                        onClick={(e) => handleVote(post.id, 1, e)}
-                      >
-                        <ArrowUpward fontSize="small" />
-                      </IconButton>
-                      <Typography variant="body2" fontWeight="bold">
-                        {post.votes_count || 0}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        color={post.user_vote === -1 ? "secondary" : "default"}
-                        onClick={(e) => handleVote(post.id, -1, e)}
-                      >
-                        <ArrowDownward fontSize="small" />
-                      </IconButton>
-                      {post.user_vote !== 0 && post.vote_id && (
-                        <Button
+            <Box display="flex" flexDirection="column" alignItems="center" width="100%">
+              {sortedPosts.map((post) => (
+                <Card
+                  key={post.id}
+                  sx={{
+                    bgcolor: "background.paper",
+                    borderRadius: 2,
+                    boxShadow: 3,
+                    mb: 3,
+                    width: { xs: "100%", md: "80%" },
+                    cursor: "pointer",
+                    "&:hover .post-actions": {
+                      visibility: "visible",
+                    },
+                  }}
+                  onClick={() => handleNavigatePostById(post.id)}
+                >
+                  <CardContent>
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Avatar sx={{ width: 32, height: 32 }}>
+                          {post.username?.charAt(0) || post.user?.name?.charAt(0)}
+                        </Avatar>
+                        <Typography variant="subtitle2" fontWeight="bold">
+                          {post.username || post.user?.name}
+                        </Typography>
+                      </Box>
+                      <Box display="flex" alignItems="center">
+                        <Typography variant="caption" color="text.secondary">
+                          {post.time || format(parseISO(post.created_at), "MMMM d, yyyy h:mm a")}
+                        </Typography>
+                        <IconButton
+                          className="post-actions"
                           size="small"
-                          color="error"
-                          onClick={(e) => handleRemoveVote(post.id, post.vote_id, e)}
-                          sx={{ ml: 1 }}
+                          sx={{ visibility: "hidden", ml: 1 }}
+                          onClick={(e) => handleMenuClick(e, post.id)}
                         >
-                          Remove Vote
-                        </Button>
-                      )}
-                    </Grid>
-                    <Grid item display="flex" alignItems="center">
-                      <ModeComment fontSize="small" color="action" />
-                      <Typography variant="body2" ml={0.5}>
-                        {post.comment_count || 0} Answers
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            ))}
-          </Grid>
+                          <MoreVert fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </Box>
 
-          {/* Sidebar */}
-          <Grid item xs={12} md={4}>
-            <Card
-              sx={{
-                bgcolor: theme.palette.background.default,
-                borderRadius: 2,
-                boxShadow: 3,
-                p: 2,
-                mb: 3,
-                width: "100%",
-              }}
-            >
-              <Typography variant="h6" fontWeight="bold" mb={2}>
-                Recent Posts
-              </Typography>
-              <Divider />
-              {sortedPosts.slice(0, showAllPosts ? sortedPosts.length : 10).map((post, index) => (
-                <Box key={post.id} display="flex" justifyContent="space-between" alignItems="center" my={1}>
-                  <Typography variant="body2" sx={{ textAlign: "left", flex: 1, color: "blue" }}>
-                    {index + 1}. {post.title}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {post.time || format(parseISO(post.created_at), "MMMM d, yyyy h:mm a")}
-                  </Typography>
-                </Box>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ textAlign: "center" }}>
+                      {post.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.primary" fontSize={20} textAlign="start" mb={2}>
+                      {post.content}
+                    </Typography>
+
+                    <Stack direction="row" spacing={1} mt={1} flexWrap="wrap" sx={{ gap: 1 }}>
+                      {post.tags?.map((tag, index) => (
+                        <Chip
+                          key={index}
+                          label={`${tag.course_code} - ${tag.course_name}`}
+                          sx={{
+                            bgcolor: "transparent",
+                            color: theme.palette.text.primary,
+                            borderRadius: 1,
+                            fontWeight: "bold",
+                            border: `1px solid ${theme.palette.grey[400]}`,
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleGetPostByTag(tag.id, tag.course_code, tag.course_name);
+                          }}
+                        />
+                      ))}
+                      {post.tags?.[0] && (
+                        <Chip
+                          label={post.tags[0].varsity}
+                          sx={{
+                            bgcolor: "transparent",
+                            color: theme.palette.primary.main,
+                            borderRadius: 1,
+                            fontWeight: "bold",
+                            border: `1px solid ${theme.palette.primary.main}`,
+                          }}
+                        />
+                      )}
+                    </Stack>
+                    <Divider sx={{ mb: 2, mt: 2 }} />
+                    <Grid container alignItems="center" justifyContent="space-between" mt={2}>
+                      <Grid item display="flex" alignItems="center">
+                        <IconButton
+                          size="small"
+                          color={post.user_vote === 1 ? "primary" : "default"}
+                          onClick={(e) => handleVote(post.id, 1, e)}
+                        >
+                          <ArrowUpward fontSize="small" />
+                        </IconButton>
+                        <Typography variant="body2" fontWeight="bold">
+                          {post.votes_count || 0}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          color={post.user_vote === -1 ? "secondary" : "default"}
+                          onClick={(e) => handleVote(post.id, -1, e)}
+                        >
+                          <ArrowDownward fontSize="small" />
+                        </IconButton>
+                        {post.user_vote !== 0 && post.vote_id && (
+                          <Button
+                            size="small"
+                            color="error"
+                            onClick={(e) => handleRemoveVote(post.id, post.vote_id, e)}
+                            sx={{ ml: 1 }}
+                          >
+                            Remove Vote
+                          </Button>
+                        )}
+                      </Grid>
+                      <Grid item display="flex" alignItems="center">
+                        <ModeComment fontSize="small" color="action" />
+                        <Typography
+                          variant="body2"
+                          ml={0.5}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShowComments(post.id);
+                          }}
+                          sx={{ cursor: "pointer", textDecoration: "underline" }}
+                        >
+                          {post.comment_count || 0} Answers
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
               ))}
-              {!showAllPosts && (
-                <Button onClick={() => setShowAllPosts(true)} sx={{ mt: 2 }}>
-                  See All
-                </Button>
-              )}
-            </Card>
+            </Box>
           </Grid>
         </Grid>
       </Container>
@@ -307,6 +379,34 @@ const Home = () => {
       >
         <MenuItem onClick={handleSavePost}>Save Post</MenuItem>
       </Menu>
+
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        sx={{ width: "400px" }} // Fixed width for the drawer
+      >
+        <Box sx={{ width: "100%", p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography variant="h6" fontWeight="bold">
+            Answers
+          </Typography>
+          <IconButton onClick={() => setDrawerOpen(false)}>
+            <Close />
+          </IconButton>
+        </Box>
+        <Box sx={{ width: "100%", p: 2 }}>
+          {renderComments(selectedPostComments)}
+          {/* <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={() => handleNavigatePostById(selectedPostId)}
+            sx={{ mt: 2 }}
+          >
+            Go to Post
+          </Button> */}
+        </Box>
+      </Drawer>
     </Box>
   );
 };
