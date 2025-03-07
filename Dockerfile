@@ -45,10 +45,10 @@ RUN composer run-script post-autoload-dump
 # Create .env file if it doesn't exist
 # RUN if [ ! -f .env ]; then cp .env.example .env; fi
 # Generate key and optimize
-RUN php artisan key:generate --force
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
+#RUN php artisan key:generate --force
+#RUN php artisan config:cache
+#RUN php artisan route:cache
+#RUN php artisan view:cache
 # Configure Apache document root
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 # Set permissions
