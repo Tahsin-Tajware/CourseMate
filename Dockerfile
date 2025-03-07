@@ -1,9 +1,13 @@
-# Multi-stage build for Laravel and React
-# Stage 1: Build React application
-FROM node:18-alpine as react-builder
+# Multi-stage build for Laravel + React with Vite
+# Stage 1: Build React application with Vite
+FROM node:20-alpine as react-builder
 WORKDIR /app
-COPY ./react ./
+# Copy React-specific package files and install dependencies
+COPY ./react/package*.json ./
 RUN npm install
+# Copy React source code
+COPY ./react/ ./
+# Build React application (creates dist folder)
 RUN npm run build
 
 # Stage 2: Laravel application
@@ -34,20 +38,22 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
+# Copy composer files and install dependencies
+COPY composer.json composer.lock ./
+RUN composer install --no-scripts --no-autoloader --no-dev
+
 # Copy Laravel files
 COPY . /var/www/html/
 
-# Remove React source (we'll use the built version)
-RUN rm -rf /var/www/html/react
+# Copy built React app from the first stage
+COPY --from=react-builder /app/dist /var/www/html/public/react
 
-# Copy built React app to public directory
-COPY --from=react-builder /app/build /var/www/html/public/react
+# Generate optimized autoloader and run scripts
+RUN composer dump-autoload --optimize --no-dev
+RUN composer run-script post-autoload-dump
 
 # Create .env file if it doesn't exist
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
-
-# Install Laravel dependencies
-RUN composer install --optimize-autoloader --no-dev
 
 # Generate key and optimize
 RUN php artisan key:generate --force
