@@ -1,4 +1,3 @@
-# Stage 1: Build React application with Vite
 FROM node:20-alpine as react-builder
 WORKDIR /app
 # Copy React-specific package files and install dependencies
@@ -9,7 +8,7 @@ COPY ./react/ ./
 # Build React application (creates dist folder)
 RUN npm run build
 
-# Stage 2: Laravel application with React
+# Stage 2: Laravel application
 FROM php:8.2.12-apache
 # Enable Apache modules
 RUN a2enmod rewrite
@@ -22,13 +21,13 @@ RUN apt-get update && apt-get install -y \
   libxml2-dev \
   libpq-dev \
   zip \
-  unzip \
-  nodejs \
-  npm
+  unzip
+
+
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo pdo_pgsql pgsql  mbstring exif pcntl bcmath gd
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
@@ -43,6 +42,13 @@ COPY --from=react-builder /app/dist /var/www/html/public/react
 # Generate optimized autoloader and run scripts
 RUN composer dump-autoload --optimize --no-dev
 RUN composer run-script post-autoload-dump
+# Create .env file if it doesn't exist
+# RUN if [ ! -f .env ]; then cp .env.example .env; fi
+# Generate key and optimize
+#RUN php artisan key:generate --force
+#RUN php artisan config:cache
+#RUN php artisan route:cache
+#RUN php artisan view:cache
 # Configure Apache document root
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 # Set permissions
@@ -51,22 +57,22 @@ RUN chown -R www-data:www-data /var/www/html \
   && chmod -R 777 storage bootstrap/cache
 # Expose port 80
 EXPOSE 80
-# Install serve globally for React
-RUN npm install -g serve
-# Start script to run both Laravel and React
+# Updated start script with migrate:fresh
+
+
 RUN echo '#!/bin/bash\n\
   cd /var/www/html\n\
   echo "Running fresh database migrations..."\n\
   php artisan migrate --force\n\
   echo "migration complete"\n\
-  echo "Starting Apache server for Laravel..."\n\
-  service apache2 start\n\
-  echo "Starting React app..."\n\
-  serve -s /var/www/html/public/react -l 3000 & \n\
-  echo "React app is running on port 3000"\n\
-  echo "Laravel app is running on port 80"\n\
-  # Keep the container running\n\
-  tail -f /dev/null' > /usr/local/bin/start.sh
+  echo "Starting Apache server..."\n\
+  apache2-foreground' > /usr/local/bin/start.sh
+
+
+
+
+
+
 RUN chmod +x /usr/local/bin/start.sh
-# Start the services
+# Start Apache
 CMD ["/usr/local/bin/start.sh"]
