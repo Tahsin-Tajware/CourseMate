@@ -6,15 +6,13 @@ WORKDIR /var/www/html
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-  libpng-dev \
-  libjpeg-dev \
-  libfreetype6-dev \
+  libpq-dev \
   zip \
   unzip \
   git \
   curl \
   libonig-dev \
-  && docker-php-ext-install pdo pdo_mysql mbstring gd
+  && docker-php-ext-install pdo pdo_pgsql mbstring
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -36,9 +34,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
 WORKDIR /var/www/html/react
 RUN npm install && npm run build
 
-# Set up Laravel environment
+# Set working directory back to Laravel root
 WORKDIR /var/www/html
-RUN php artisan cache:clear && php artisan config:clear && php artisan config:cache
+
 
 # Expose port
 EXPOSE 9000
