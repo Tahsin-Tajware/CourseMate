@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql pgsql pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo pdo_pgsql pgsql  mbstring exif pcntl bcmath gd
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
@@ -52,10 +52,9 @@ RUN php artisan view:cache
 # Configure Apache document root
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html
-RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
-
+RUN chown -R www-data:www-data /var/www/html \
+  && chmod -R 755 /var/www/html \
+  && chmod -R 777 storage bootstrap/cache
 # Expose port 80
 EXPOSE 80
 # Updated start script with migrate:fresh
@@ -63,6 +62,7 @@ RUN echo '#!/bin/bash\n\
   cd /var/www/html\n\
   echo "Running fresh database migrations..."\n\
   php artisan migrate --force\n\
+  echo "migration complete"\n\
   echo "Starting Apache server..."\n\
   apache2-foreground' > /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
