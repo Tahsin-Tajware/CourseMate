@@ -1,4 +1,3 @@
-
 name: Vercel Preview Deployment
 
 env:
@@ -26,13 +25,23 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        working-directory: react
+        #working-directory: react
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
-        working-directory: react
+        # working-directory: react
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --debug
 
       - name: Deploy Project Artifacts to Vercel
-        working-directory: react
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        # working-directory: react
+        run: |
+          OUTPUT=$(du --inodes -d 5 .vercel/output)
+          echo "$OUTPUT"
+          LAST=$(echo "$OUTPUT" | tail -n 1)
+          PERCENTAGE=$(echo "$LAST" | awk 'BEGIN {maxtotal=15000} { printf "%.2f%%", ($1/maxtotal*100) }')
+          echo "Vercel file usage percentage" >> $GITHUB_STEP_SUMMARY
+          echo "$PERCENTAGE" >> $GITHUB_STEP_SUMMARY
+          du -h -d 3 .vercel/output/functions/en
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          vercel alias --scope ${{ secrets.VERCEL_TEAM_ID }} --token ${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` biodrop-preview.vercel.app
+        #run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
