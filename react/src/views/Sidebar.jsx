@@ -1,21 +1,21 @@
 import React from "react";
 import { Box, List, ListItem, ListItemIcon, ListItemText, Drawer } from "@mui/material";
-import { Home, QuestionAnswer, BookmarkBorder, Help, Settings, People, StarBorder, Info } from "@mui/icons-material";
+import { Home, QuestionAnswer, BookmarkBorder, Help, Settings, People, StarBorder, Info,Person } from "@mui/icons-material";
 import { Link, useLocation } from "react-router-dom";
-
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
 
   const navItems = [
     { text: "Home", icon: <Home />, path: "/" },
-    { text: "All Questions", icon: <QuestionAnswer />, path: "/all-questions" },
-    { text: "Course Tags", icon: <BookmarkBorder />, path: "/course-tags" },
+    // { text: "All Questions", icon: <QuestionAnswer />, path: "/all-questions" },
+    // { text: "Course Tags", icon: <BookmarkBorder />, path: "/course-tags" },
     { text: "Ask Question", icon: <Help />, path: "/ask-question" },
-    { text: "Discussions", icon: <People />, path: "/discussions" },
-    { text: "Community", icon: <People />, path: "/community" },
-    { text: "Saved Questions", icon: <StarBorder />, path: "/saved-questions" },
-    { text: "Following", icon: <People />, path: "/following" },
-    { text: "Settings", icon: <Settings />, path: "/settings" },
+    { text: "My Posts", icon: <People />, path: "/myposts" },
+    // { text: "Discussions", icon: <People />, path: "/discussions" },
+    // { text: "Community", icon: <People />, path: "/community" },
+    { text: "Saved Questions", icon: <StarBorder />, path: "/saved-post" },
+    // { text: "Following", icon: <People />, path: "/following" },
+    { text: "My Profile", icon: < Person />, path: "/profile" },
     { text: "About", icon: <Info />, path: "/about" },
   ];
 

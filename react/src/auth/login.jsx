@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import loginImage from "../image/login_sideimage.png";
 import Sidebar from "../views/Sidebar";
-import Swal from "sweetalert2";
 
 import google_img from '../../public/assets/google_img.png'
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -21,7 +20,7 @@ const Login = () => {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-
+  const message = location.state?.message;
   const googleLogin = () => {
     window.location.href = `${VITE_BASE_URL}/auth/google`;
   };
@@ -86,7 +85,11 @@ const Login = () => {
       <div className="flex w-full max-w-4xl bg-transparent rounded-lg overflow-hidden mx-auto">
 
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-center bg-transparent">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Welcome Back!</h2>
+          {message ?
+            <div className=" text-orange-600 font-bold text-4xl mb-4"> {message}</div>
+            :
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Welcome Back!</h2>
+          }
           {/* <p className="text-gray-600 mb-6">
             Sign in to your account to unlock all the amazing features.
           </p> */}
