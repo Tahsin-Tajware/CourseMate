@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";  
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { customAxios } from "../api/axiosPrivate";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -22,8 +22,6 @@ import {
   Collapse,
   Dialog,
   DialogContent,
-  InputAdornment,
-  Tooltip,
 } from "@mui/material";
 import {
   ArrowUpward,
@@ -32,13 +30,14 @@ import {
   ModeComment,
   Share as ShareIcon,
   MoreVert,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
 } from "@mui/icons-material";
 import SendIcon from "@mui/icons-material/Send";
 import { format, parseISO } from "date-fns";
 import axiosPrivate from "../api/axiosPrivate";
 import { useAuth } from "../context/authContext";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 const PostById = () => {
@@ -345,10 +344,10 @@ const PostById = () => {
                 sx={{ flexGrow: 1 }}
               />
               <Button variant="contained" size="small" color="primary" onClick={() => handleEditComment(comment.id)}>
-                Save
+                <SendIcon />
               </Button>
               <Button variant="text" size="small" color="secondary" onClick={() => setEditingCommentId(null)}>
-                Cancel
+                <RemoveCircleIcon fontSize="small" />
               </Button>
             </Box>
           ) : (
@@ -357,27 +356,23 @@ const PostById = () => {
             </Typography>
           )}
           <Box display="flex" alignItems="center" gap={1} mt={1} ml={6}>
-            <Button
-              variant="text"
+            <IconButton
               size="small"
-              startIcon={<ArrowUpward fontSize="small" />}
               color={comment.user_vote === 1 ? "primary" : "inherit"}
               onClick={() => handleCommentVote(comment.id, 1)}
             >
-              Upvote
-            </Button>
+              <ArrowUpward fontSize="small" />
+            </IconButton>
             <Typography variant="body2" fontWeight="bold">
               {comment.votes_count || 0}
             </Typography>
-            <Button
-              variant="text"
+            <IconButton
               size="small"
-              startIcon={<ArrowDownward fontSize="small" />}
               color={comment.user_vote === -1 ? "secondary" : "inherit"}
               onClick={() => handleCommentVote(comment.id, -1)}
             >
-              Downvote
-            </Button>
+              <ArrowDownward fontSize="small" />
+            </IconButton>
             {comment.user_vote !== 0 && comment.vote_id && (
               <Button
                 variant="text"
@@ -385,23 +380,21 @@ const PostById = () => {
                 color="error"
                 onClick={() => handleRemoveCommentVote(comment.id, comment.vote_id)}
               >
-                Remove Vote
+                <RemoveCircleIcon fontSize="small" />
               </Button>
             )}
-            <Button
-              variant="text"
+            <IconButton
               size="small"
-              startIcon={<ReplyIcon fontSize="small" />}
               onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
             >
-              Reply
-            </Button>
-            <Button variant="text" size="small" startIcon={<ShareIcon fontSize="small" />}>
-              Share
-            </Button>
-            <Button variant="text" size="small" onClick={(event) => handleMenuOpen(event, comment.id)}>
+              <ReplyIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small">
+              <ShareIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" onClick={(event) => handleMenuOpen(event, comment.id)}>
               <MoreVert fontSize="small" />
-            </Button>
+            </IconButton>
             <Menu
               id="comment-menu"
               anchorEl={anchorEl}
@@ -411,8 +404,14 @@ const PostById = () => {
             >
               {comment.user_id === auth?.user?.id ? (
                 <>
-                  <MenuItem onClick={() => handleEditClick(comment)}>Edit</MenuItem>
-                  <MenuItem onClick={() => handleDeleteComment(comment.id)}>Delete</MenuItem>
+                  <MenuItem onClick={() => handleEditClick(comment)}>
+                    <EditIcon fontSize="small" />
+                    Edit
+                  </MenuItem>
+                  <MenuItem onClick={() => handleDeleteComment(comment.id)}>
+                    <DeleteIcon fontSize="small" />
+                    Delete
+                  </MenuItem>
                 </>
               ) : (
                 <MenuItem
@@ -422,6 +421,7 @@ const PostById = () => {
                     handleMenuClose();
                   }}
                 >
+                  <MoreVert fontSize="small" />
                   Report
                 </MenuItem>
               )}
@@ -439,70 +439,24 @@ const PostById = () => {
                 onChange={(e) => setReplyContent(e.target.value)}
                 InputProps={{
                   endAdornment: (
-                    <InputAdornment position="end">
-                      <Box display="flex" gap={1}>
-                        <Tooltip title="Add Attachment">
-                          <Button variant="text" onClick={() => document.getElementById("reply-file-upload").click()}>
-                            <AttachFileIcon />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip title="Send Reply">
-                          <Button variant="text" onClick={() => handleAddComment(comment.id)}>
-                            <SendIcon color="primary" />
-                          </Button>
-                        </Tooltip>
-                      </Box>
-                    </InputAdornment>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleAddComment(comment.id)}
+                      sx={{
+                        position: 'absolute',
+                        right: '8px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        minWidth: '40px',
+                        minHeight: '40px',
+                      }}
+                    >
+                      <SendIcon />
+                    </Button>
                   ),
                 }}
               />
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) =>
-                  handleFileUpload(
-                    e,
-                    e.target.files[0].type.startsWith("image/") ? "image" : "pdf",
-                    true
-                  )
-                }
-                style={{ display: "none" }}
-                id="reply-file-upload"
-              />
-              {(replyImages.length > 0 || replyPdf) && (
-                <Box mt={1}>
-                  {replyImages.length > 0 && (
-                    <Box display="flex" gap={1}>
-                      {replyImages.map((image, index) => (
-                        <Box key={index} sx={{ position: "relative" }}>
-                          <img
-                            src={URL.createObjectURL(image)}
-                            alt={`Selected ${index}`}
-                            style={{ maxHeight: "50px", borderRadius: "4px" }}
-                          />
-                          <Button
-                            variant="text"
-                            size="small"
-                            sx={{ position: "absolute", top: -8, right: -8, backgroundColor: "white" }}
-                            onClick={() => handleRemoveImage(index, true)}
-                          >
-                            <RemoveCircleIcon sx={{ fontSize: "16px", color: "red" }} />
-                          </Button>
-                        </Box>
-                      ))}
-                    </Box>
-                  )}
-                  {replyPdf && (
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <PictureAsPdfIcon color="secondary" />
-                      <Typography variant="body2">{replyPdf.name}</Typography>
-                      <Button variant="text" size="small" onClick={() => handleRemovePdf(true)}>
-                        <RemoveCircleIcon sx={{ fontSize: "16px", color: "red" }} />
-                      </Button>
-                    </Box>
-                  )}
-                </Box>
-              )}
             </Box>
           )}
           {comment.replies && comment.replies.length > 0 && (
@@ -578,7 +532,7 @@ const PostById = () => {
               </IconButton>
               {post.user_vote !== 0 && post.vote_id && (
                 <Button variant="outlined" size="small" color="error" onClick={handleRemoveVotePost} sx={{ ml: 1 }}>
-                  Remove Vote
+                  <RemoveCircleIcon fontSize="small" />
                 </Button>
               )}
             </Grid>
@@ -600,84 +554,36 @@ const PostById = () => {
         <Typography variant="h6" fontWeight="bold" mb={2}>
           Add a comment
         </Typography>
-        <TextField
-          label="Add a comment"
-          variant="outlined"
-          fullWidth
-          multiline
-          rows={2}
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          sx={{ mb: 2 }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Tooltip title="Add Attachment">
-                  <Button variant="text" onClick={() => document.getElementById("comment-file-upload").click()}>
-                    <AttachFileIcon />
-                  </Button>
-                </Tooltip>
-              </InputAdornment>
-            ),
-          }}
-        />
-        <input
-          type="file"
-          accept="image/*,application/pdf"
-          onChange={(e) =>
-            handleFileUpload(
-              e,
-              e.target.files[0].type.startsWith("image/") ? "image" : "pdf"
-            )
-          }
-          style={{ display: "none" }}
-          id="comment-file-upload"
-        />
-        {(commentImages.length > 0 || commentPdf) && (
-          <>
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold", textAlign: "left" }}>
-              Attachments
-            </Typography>
-            {commentImages.length > 0 && (
-              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {commentImages.map((image, index) => (
-                  <Box key={index} sx={{ position: "relative" }}>
-                    <img
-                      src={URL.createObjectURL(image)}
-                      alt={`Selected ${index}`}
-                      style={{ maxHeight: "50px", cursor: "pointer", borderRadius: "4px" }}
-                    />
-                    <Button
-                      variant="text"
-                      size="small"
-                      sx={{ position: "absolute", top: -10, right: -10, backgroundColor: "white" }}
-                      onClick={() => handleRemoveImage(index)}
-                    >
-                      <RemoveCircleIcon sx={{ fontSize: "20px", color: "red" }} />
-                    </Button>
-                  </Box>
-                ))}
-              </Box>
-            )}
-            {commentPdf && (
-              <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
-                <PictureAsPdfIcon color="secondary" />
-                <Typography variant="body2">{commentPdf.name}</Typography>
-                <Button variant="text" size="small" onClick={handleRemovePdf}>
-                  <RemoveCircleIcon sx={{ fontSize: "20px", color: "red" }} />
+        <Box display="flex" alignItems="center">
+          <TextField
+            label="Add a comment"
+            variant="outlined"
+            fullWidth
+            multiline
+            rows={2}
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={(e) => { e.preventDefault(); handleAddComment(); }}
+                  sx={{
+                    position: 'absolute',
+                    right: '8px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    minWidth: '40px',
+                    minHeight: '40px'
+                  }}
+                >
+                  <SendIcon />
                 </Button>
-              </Box>
-            )}
-          </>
-        )}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={(e) => { e.preventDefault(); handleAddComment(); }}
-          sx={{ minWidth: "40px", minHeight: "40px" }}
-        >
-          <SendIcon />
-        </Button>
+              ),
+            }}
+          />
+        </Box>
       </Card>
       <Card sx={{ bgcolor: theme.palette.background.paper, borderRadius: 2, boxShadow: 3, p: 3 }}>
         <Typography variant="h6" fontWeight="bold" mb={2}>
