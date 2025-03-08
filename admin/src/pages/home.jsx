@@ -32,7 +32,7 @@ import {
 } from "recharts";
 import axiosPrivate from "../api/axiosPrivate";
 
-const API_BASE_URL = "http://127.0.0.1:8000/api/admin";
+const API_BASE_URL = "https://coursemate-p3ye.onrender.com/api/admin";
 const fadeIn = keyframes`
   from {
     opacity: 0;
