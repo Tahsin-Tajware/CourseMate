@@ -10,27 +10,13 @@ on:
       - main
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-
-  #     # Frontend Tests
-  #     - name: Set up Node.js & Install Dependencies
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 20
-
-  #     - name: Install frontend dependencies
-  #       run: npm install
-
-  # - name: Run React Tests
-  #   run: npm test -- --watchAll=false
-
   Deploy-Preview:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Install Bash
+        run: sudo apt-get update && sudo apt-get install bash
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
