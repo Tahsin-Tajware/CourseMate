@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\CheckAdmin;
 
 return Application::configure(basePath: dirname(__DIR__))
   ->withRouting(
@@ -13,7 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     apiPrefix: 'api',
   )
   ->withMiddleware(function (Middleware $middleware) {
-    //
+    $middleware->alias([
+      'checkAdmin' => CheckAdmin::class,
+    ]);
   })
   ->withExceptions(function (Exceptions $exceptions) {
     //
