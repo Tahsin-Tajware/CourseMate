@@ -13,9 +13,9 @@ jobs:
   Deploy-Production:
     # needs: test  # Ensures deployment happens only if tests pass
     runs-on: ubuntu-latest
-    
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install Bash
         run: sudo apt-get update && sudo apt-get install bash
@@ -33,4 +33,12 @@ jobs:
 
       - name: Deploy Project Artifacts to Vercel
         working-directory: react
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --debug
+        run: |
+          OUTPUT=$(du --inodes -d 5 .vercel/output)
+          echo "$OUTPUT"
+          LAST=$(echo "$OUTPUT" | tail -n 1)
+          PERCENTAGE=$(echo "$LAST" | awk 'BEGIN {maxtotal=15000} { printf "%.2f%%", ($1/maxtotal*100) }')
+          echo "Vercel file usage percentage" >> $GITHUB_STEP_SUMMARY
+          echo "$PERCENTAGE" >> $GITHUB_STEP_SUMMARY
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        #run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --debug
