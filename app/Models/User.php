@@ -24,6 +24,7 @@ class User extends Authenticatable implements JWTSubject
     'password',
     'varsity',
     'department',
+    'role',
     'points',
     'google_id'
   ];
@@ -38,12 +39,9 @@ class User extends Authenticatable implements JWTSubject
     'remember_token',
     'email_verified_at',
     'created_at',
-    'updated_at',
-    'role',
+    'updated_at'
   ];
-  protected $guarded = [
-    'role',
-  ];
+
   /**
    * Get the attributes that should be cast.
    *
@@ -62,15 +60,6 @@ class User extends Authenticatable implements JWTSubject
     return $this->getKey();
   }
 
-  public function post()
-  {
-    return $this->hasMany(Post::class);
-  }
-  public function savedPost()
-  {
-    return $this->belongsToMany(Post::class, 'saved_post', 'user_id', 'post_id')->with('user', 'tags');
-  }
-
   /**
    * Return a key value array, containing any custom claims to be added to the JWT.
    *
@@ -79,9 +68,5 @@ class User extends Authenticatable implements JWTSubject
   public function getJWTCustomClaims()
   {
     return [];
-  }
-  public function receiveBroadcastNotificationsOn()
-  {
-    return 'App.Models.User.' . $this->id;
   }
 }

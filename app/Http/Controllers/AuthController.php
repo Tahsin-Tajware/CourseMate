@@ -22,8 +22,7 @@ class AuthController extends Controller
       "name" => $validatedData["name"],
       "password" => bcrypt($validatedData["password"]),
       "varsity" => $validatedData["varsity"] ?? null,
-      "department" => $validatedData["department"] ?? null,
-      'role' => 'user',
+      "department" => $validatedData["department"] ?? null
     ]);
     $token = auth('api')->login($user);
 
@@ -34,16 +33,6 @@ class AuthController extends Controller
     $credentials = request(['email', 'password']);
 
     if (! $token = auth('api')->attempt($credentials)) {
-      return response()->json(['error' => 'Unauthorized'], 401);
-    }
-    return $this->respondWithToken($token, auth('api')->user());
-  }
-
-  public function adminLogin()
-  {
-    $credentials = request(['email', 'password']);
-
-    if ((! $token = auth('api')->attempt($credentials)) || auth('api')->user()->role != 'admin') {
       return response()->json(['error' => 'Unauthorized'], 401);
     }
 
