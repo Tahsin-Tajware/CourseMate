@@ -14,7 +14,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     // { text: "Discussions", icon: <People />, path: "/discussions" },
     // { text: "Community", icon: <People />, path: "/community" },
     { text: "Saved Questions", icon: <StarBorder />, path: "/saved-post" },
-    // { text: "Following", icon: <People />, path: "/following" },
+    { text: "All Tags", icon: <People />, path: "/tags" },
     { text: "My Profile", icon: < Person />, path: "/profile" },
     { text: "About", icon: <Info />, path: "/about" },
   ];
