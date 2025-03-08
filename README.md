@@ -30,8 +30,10 @@ University students seeking help with course materials or topics and willing to 
 
 ### UI Design
 
+- **Tool**: Figma
+- **Design Link**: [CourseMate Figma Design](https://www.figma.com/design/fKDPJjzPK2vsDutBGt5i9C/Project?node-id=0-1&t=Gq2vDuo5aOzYM2P0-1)
 
-##  Installation
+## Installation
 
 ### Requirements
 
@@ -94,6 +96,8 @@ npm install
 npm run dev
 ```
 
+Frontend live link: [CourseMate Frontend](https://coursemate-frontend.vercel.app)
+
 ---
 
 ### Admin Panel
@@ -112,6 +116,8 @@ npm install
 ```sh
 npm run dev
 ```
+
+Admin panel live link: [CourseMate Admin Panel](https://coursemate-admin-eight.vercel.app)
 
 ---
 
@@ -182,10 +188,7 @@ npm run dev
 - Testing, bug fixes & final deployment
 
 ---
-- **Tool**: Figma
-- **Design Link**: [CourseMate Figma Design](https://www.figma.com/design/fKDPJjzPK2vsDutBGt5i9C/Project?node-id=0-1&t=Gq2vDuo5aOzYM2P0-1)
 
----
 ## Team Members
 
 | **ID**      | **Name**                 | **Email**                    | **Role**           |
