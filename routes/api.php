@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TagController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
@@ -47,6 +48,7 @@ Route::get('comment/{post_id}', [CommentController::class, 'getAllComments']);
 Route::get('post_by_id/{post_id}', [PostController::class, 'getPostById']);
 Route::get('post_by_tag/{tag_id}', [PostController::class, 'getPostsByTag']);
 Route::get('posts/search', [PostController::class, 'search']);
+Route::get('tags', [TagController::class, 'index']);
 //protected routes
 Broadcast::routes(['middleware' => ['auth:api']]);
 Route::middleware(['auth:api'])->group(function () {

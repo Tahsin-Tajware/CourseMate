@@ -1,4 +1,3 @@
-
 import { createBrowserRouter } from "react-router-dom";
 import Register from "./auth/register";
 import Home from "./views/home";
@@ -15,11 +14,12 @@ import PostByTag from "./views/postByTag.jsx";
 import PostById from "./views/postById.jsx";
 import SavedPost from "./views/savedPost.jsx";
 import SearchResults from "./views/searchPage.jsx";
+import TagsList from "./views/TagsList";
+
 const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
-
       { path: "/", element: <Home /> },
       { path: "/register", element: <Register /> },
       { path: "/login", element: <Login /> },
@@ -28,6 +28,7 @@ const router = createBrowserRouter([
       { path: "/posts-by-tag/:tag_id", element: <PostByTag /> },
       { path: '/post/:post_id', element: <PostById /> },
       { path: '/search/:query', element: <SearchResults /> },
+      { path: "/tags", element: <TagsList /> },
 
       // Protected routes
       {
@@ -38,8 +39,6 @@ const router = createBrowserRouter([
           { path: "/myposts", element: <PostPage /> },
           { path: "/edit-post/:postId", element: <UpdatePost /> },
           { path: "/saved-post", element: <SavedPost /> },
-
-
         ],
       },
     ],
@@ -47,4 +46,3 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
-
