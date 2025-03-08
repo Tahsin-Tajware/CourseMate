@@ -13,6 +13,9 @@ jobs:
   Deploy-Production:
     # needs: test  # Ensures deployment happens only if tests pass
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v2
 
