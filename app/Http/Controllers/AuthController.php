@@ -138,7 +138,7 @@ class AuthController extends Controller
     );
     $token = auth('api')->login($user);
 
-    return redirect()->to("http://localhost:5173/auth/google-callback?token=$token&user=" . urlencode(json_encode([
+    return redirect()->to("https://coursemate-frontend.vercel.app/auth/google-callback?token=$token&user=" . urlencode(json_encode([
       'id' => $user->id,
       'name' => $user->name,
       'email' => $user->email,
